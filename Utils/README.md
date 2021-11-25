@@ -62,6 +62,12 @@ $ culr http://localhost:5000/sensor -d "cmd=toggle_fire" -X PUT -v
 {'message': 'Not implemented yet'}
 ```
 
+**DELETE** to remove a sensor from the gateway
+```shell
+$ culr http://localhost:5000/sensor/0c8e145e-4cec-479e-8c3a-2129285e6db7 -X DELETE -v
+{'message': 'Not implemented yet'}
+```
+
 ### /measurement/<sensor_id>/<count>
 **GET** to receive last *count* measurements of a sensor (/count is optional, defaults to 1)
 ```shell
