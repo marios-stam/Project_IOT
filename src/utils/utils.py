@@ -15,7 +15,7 @@ def diff_time(t1, t2) -> int:
     return int(res.total_seconds())
 
 
-def rand_perc(inc=False, neg=False, center=False) -> float:
+def rand_perc(inc: bool = False, neg: bool = False, center: bool = False) -> float:
     res = randint(0, 10000000) / 10000000
     if inc:
         return res + 1
@@ -26,11 +26,11 @@ def rand_perc(inc=False, neg=False, center=False) -> float:
     return res
 
 
-def is_perc(perc) -> bool:
+def is_perc(perc: float) -> bool:
     return 0 <= perc <= 1
 
 
-def rand_check(chance) -> bool:
+def rand_check(chance: float) -> bool:
     perc = rand_perc()
     if not is_perc(perc) or not is_perc(chance):
         raise Exception("Number is not percentage")
