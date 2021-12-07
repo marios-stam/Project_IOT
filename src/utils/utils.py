@@ -26,7 +26,8 @@ def rand_perc(inc=False, neg=False, center=False) -> float:
     return res
 
 
-def is_perc(perc) -> bool: return 0 <= perc <= 1
+def is_perc(perc) -> bool:
+    return 0 <= perc <= 1
 
 
 def rand_check(chance) -> bool:

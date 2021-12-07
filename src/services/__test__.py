@@ -2,4 +2,4 @@ from src.services import utils
 
 
 if __name__ == '__main__':
-    utils.graph_history(5)
+    utils.graph_rand_history()
