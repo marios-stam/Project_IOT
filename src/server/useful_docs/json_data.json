@@ -16,6 +16,14 @@
     "admin": false
 }
 
+//Truck
+{"id":1,
+  "fullness":69, 
+  "position": "x: 15, y: 15", 
+  "status": 50, 
+  "updated": "Thu, 16 Dec 2021 12:20:10 GMT"
+}
+
 
 
 

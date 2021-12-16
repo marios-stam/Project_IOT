@@ -104,7 +104,7 @@ class Truck(db.Model):
         nullable=False
     )
 
-    fullnes = db.Column(
+    fullness = db.Column(
         db.Integer,
         index=False,
         unique=False,
