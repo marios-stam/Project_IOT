@@ -18,15 +18,12 @@ def get_bin(bin_id=None):
         return make_response(f"No bin found with ID: {bin_id}")
     else:
         print(f"Gettind data of bin: {bin_id} ...")
+        data = result[0].__dict__
+        data.pop('_sa_instance_state')
 
-        data_json = jsonify(
-            fullness=result[0].fullness,
-            status=result[0].status,
-            position=result[0].position,
-            updated=result[0].updated
-        )
+        data_json = jsonify(data)
 
-    return make_response(data_json)
+        return make_response(data_json)
 
 
 def update_bin(bin_id=None):
@@ -45,52 +42,28 @@ def update_bin(bin_id=None):
     result = db.session.query(Bin).filter(Bin.id == id).all()
     if(len(result) == 0):
         return create_bin(data)
-    else:
-        result[0].fullness = fullness
-        result[0].status = status
-        result[0].position = position
-        result[0].updated = updated
 
-    # update database
+    print(f"Updating bin with ID:{id} ...")
+    for key, value in data.items():
+        if key == 'created' or key == 'updated':
+            result[0].updated = dt.now()
+            continue
+
+        setattr(result[0], key, value)
+
     db.session.commit()
-    return make_response("PUT called")
+
+    return make_response(f"Updated bin with ID:{id}")
 
 
 def create_bin(data=None):
     if data == None:
         data = request.get_json()
 
-    id = data['id']
-    status = data['status']
-    fullness = data['fullness']
-    position = data['position']
-    updated = dt.now()
+    data['updated'] = dt.now()  # set created date
+    new_bin = Bin(**data)
 
-    print("status:", status)
-    print("fullness:", fullness)
-    print("position:", position)
-    print("updated:", updated)
-
-    response = ""
-    if id is None or status is None or fullness is None or updated is None or position is None:
-        response = "TEST BIN CALLED"
-        id = 99
-        status = 1
-        fullness = 0
-        updated = dt.now()
-        position = "x:55 y:55"
-
-    new_bin = Bin(
-        id=id,
-        status=status,
-        fullness=fullness,
-        updated=dt.now(),
-        position=position
-    )
-
-    db.session.add(new_bin)  # Adds new User record to database
-    db.session.commit()  # Commits all changes
-
-    response += f"{new_bin} successfully created"
-
-    return make_response(response)
+    # add to database
+    db.session.add(new_bin)
+    db.session.commit()
+    return make_response(f"New bin created with ID:{new_bin.id}")
