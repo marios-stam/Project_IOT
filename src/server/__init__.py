@@ -19,11 +19,13 @@ def init_app():
         from .apps import routes
         from .bins import routes
         from .trucks import routes
+        from .users import routes
 
         # Register Blueprints
         app.register_blueprint(bins.routes.bins_blueprint)
         app.register_blueprint(apps.routes.apps_blueprint)
         app.register_blueprint(trucks.routes.trucks_blueprint)
+        app.register_blueprint(users.routes.users_blueprint)
 
         # Create sql tables from data models
         print("Creating SQL Tables")
