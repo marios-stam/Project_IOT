@@ -1,0 +1,29 @@
+// Bin 
+{"id":854,
+    "fullness":69, 
+    "position": "x: 15, y: 15", 
+    "status": 50, 
+    "updated": "Thu, 16 Dec 2021 12:20:10 GMT"
+  }
+
+// User
+{"id":1,
+    "username": "John", 
+    "email": "John.Doe@upatras.gr",	
+    "password": "123456789",
+    "created": "Thu, 16 Dec 2021 12:20:10 GMT",
+    "bio": "",
+    "admin": false
+}
+
+//Truck
+{"id":1,
+  "fullness":69, 
+  "position": "x: 15, y: 15", 
+  "status": 50, 
+  "updated": "Thu, 16 Dec 2021 12:20:10 GMT"
+}
+
+
+
+

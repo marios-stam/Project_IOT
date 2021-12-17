@@ -1,8 +1,10 @@
 # Utilities
 
+src.utils is a package containing various helper classes, scripts and sub-packages.
+
 ## Dummy Sensors
 
-dummy_sensors.py is a script that generates mock data for testing. The data are accessed via RESTful API.
+src.utils.dummy_sensors is a package that generates mock sensor data for testing. The data are accessed via RESTful API.
 
 ### Sensor Implementation
 Each dummy sensor is a Sensor object that contains an id, characteristics and mock data values, a Process and a Pipe 
@@ -107,3 +109,24 @@ $ curl http://localhost:5000/measurement/0c8e145e-4cec-479e-8c3a-2129285e6db7/2
     }
 ]
 ```
+
+## Miscellaneous Utilities
+
+src.utils.utils is a package containing various functions used over the project
+
+### `rand_perc(inc: bool = False, neg: bool = False, center: bool = False) -> float`
+
+Returns a random percentage in range [0, 1]
+
+#### Flags
+- inc: changes the range to [1, 2]
+- neg: changes the range to [-1, 0]
+- center: changes the range to [-1, 1]
+
+### `is_perc(perc: float) -> bool)`
+
+Returns `True` if `perc` is a percentage (between 0 and 1)
+
+### `rand_check(chance: float) -> bool`
+
+Makes a random check that has `chance` chances to succeed. Returns `True` on success and `False` in failure.
