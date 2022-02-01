@@ -1,0 +1,27 @@
+{% extends "base.html" %} {% block title %} Login {% endblock %} {% block head
+%} {% endblock %} {% block content %}
+
+<!-- Logo and name -->
+<div>
+  <img src="{{ url_for('static', filename='images/keep-clean.png') }}" />
+  <h1>Login</h1>
+</div>
+
+<!-- Login form -->
+<div class="container my-4" style="max-width: 540px">
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.username.label }} {{ form.username(class="form-control") }}
+    </div>
+    <div class="mb-3">
+      {{ form.password.label }} {{ form.password(class="form-control") }}
+    </div>
+    <div class="my-4 mx-auto">
+      <input type="submit" class="btn btn-primary" value="Submit" />
+    </div>
+    <div class="mb-3">No account? <a href="/auth/register">Create one!</a></div>
+  </form>
+</div>
+
+{%endblock %}

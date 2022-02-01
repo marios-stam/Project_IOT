@@ -1,0 +1,106 @@
+{% extends "base.html" %} {% block title %} Home {% endblock %} {% block head %}
+{% endblock %} {% block content %}
+
+<!-- Logo, name, description -->
+<div>
+  <img src="{{ url_for('static', filename='images/keep-clean.png') }}" />
+  <h1>CleanerCity</h1>
+  <span>An IoT solution for waste management.</span>
+</div>
+
+<!-- Links to login or register -->
+<div class="d-grid gap-2 d-md-block my-4">
+  <a class="btn btn-primary btn-lg col-md-4" href="/auth/login" role="button"
+    >Login</a
+  >
+  <a
+    class="btn btn-secondary btn-lg col-md-4"
+    href="/auth/register"
+    role="button"
+    >Register</a
+  >
+</div>
+
+<!-- Explanatory cards -->
+<div class="row row-cols-1 row-cols-md-3 g-4 text-dark">
+  <div class="col">
+    <div class="card h-100">
+      <img
+        src="{{ url_for('static', filename='images/disposal.png') }}"
+        class="card-img-top mx-auto mt-3"
+        style="max-height: 100px; max-width: 100px"
+      />
+      <div class="card-body">
+        <h5 class="card-title">Citizen</h5>
+        <p class="card-text">
+          Our application lets you easily find your nearest and appropriate
+          garbage can. Assist in the waste management process by reporting a
+          problem (e.g., titled bin), or changing the empty battery of a sensor.
+          With each action you earn points for great rewards!
+        </p>
+      </div>
+      <div class="card-footer">
+        <a href="/ctz" class="btn btn-primary">Try Out Contributing</a>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100">
+      <img
+        src="{{ url_for('static', filename='images/garbage-truck.png') }}"
+        class="card-img-top mx-auto mt-3"
+        style="max-height: 100px; max-width: 100px"
+      />
+      <div class="card-body">
+        <h5 class="card-title">Driver</h5>
+        <p class="card-text">
+          Login to see which garbage cans must be emptied in real-time, what is
+          the optimal route to do so and directions to them. Get informed about
+          the time you need to set off, or the fullness of your truck.
+        </p>
+      </div>
+      <div class="card-footer">
+        <a href="/drv" class="btn btn-primary">Start Your Shift</a>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100">
+      <img
+        src="{{ url_for('static', filename='images/administrative-tools.png') }}"
+        class="card-img-top mx-auto mt-3"
+        style="max-height: 100px; max-width: 100px"
+      />
+      <div class="card-body">
+        <h5 class="card-title">Manager</h5>
+        <p class="card-text">
+          Monitor the whole infrastructure. Add or remove components, see
+          statistics about each section of the city, and be aware of upcoming
+          urgencies with our AI fill level prediction. Send announcements to
+          citizens and/or drivers and receive reports about problems.
+        </p>
+      </div>
+      <div class="card-footer">
+        <a href="/mng" class="btn btn-primary">Go to Dashboard</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer for links -->
+<div class="footer mt-4">
+  <a target="_blank" href="https://icons8.com/icon/h1p90TUpm405/keep-clean"
+    >Keep Clean</a
+  >,
+  <a target="_blank" href="https://icons8.com/icon/10766/disposal">Disposal</a>,
+  <a target="_blank" href="https://icons8.com/icon/36496/garbage-truck"
+    >Garbage Truck</a
+  >,
+  <a target="_blank" href="https://icons8.com/icon/8801/administrative-tools"
+    >Administrative Tools</a
+  >
+  icons by
+  <a target="_blank" href="https://icons8.com">Icons8</a>
+</div>
+
+{%endblock %}
