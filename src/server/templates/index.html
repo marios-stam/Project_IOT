@@ -10,12 +10,15 @@
 
 <!-- Links to login or register -->
 <div class="d-grid gap-2 d-md-block my-4">
-  <a class="btn btn-primary btn-lg col-md-4" href="/auth/login" role="button"
+  <a
+    class="btn btn-primary btn-lg col-md-4"
+    href="{{ url_for('auth_blueprint.login') }}"
+    role="button"
     >Login</a
   >
   <a
     class="btn btn-secondary btn-lg col-md-4"
-    href="/auth/register"
+    href="{{ url_for('auth_blueprint.register') }}"
     role="button"
     >Register</a
   >

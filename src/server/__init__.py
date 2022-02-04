@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 
@@ -22,7 +22,8 @@ def init_app():
         from .bins import routes
         from .trucks import routes
         from .users import routes
-        from . import auth  # Temp (auth/register, auth/login, auth/logout)
+        from .auth import routes
+        from .profile import routes
         from . import views  # Temp ('index')
 
         # Register Blueprints
@@ -30,7 +31,8 @@ def init_app():
         app.register_blueprint(apps.routes.apps_blueprint)
         app.register_blueprint(trucks.routes.trucks_blueprint)
         app.register_blueprint(users.routes.users_blueprint)
-        app.register_blueprint(auth.auth_blueprint)  # Temp
+        app.register_blueprint(auth.routes.auth_blueprint)
+        app.register_blueprint(profile.routes.profile_blueprint)
         app.register_blueprint(views.bp)  # Temp
 
         # Create sql tables from data models
@@ -57,4 +59,21 @@ def init_app():
 
         '''End of Flask-Login configuration'''
 
+        # Custom Error Pages
+        app.register_error_handler(403, forbidden)
+        app.register_error_handler(404, page_not_found)
+        app.register_error_handler(500, internal_server_error)
+
         return app
+
+
+def forbidden(e):
+    return render_template('errors/403.html'), 403
+
+
+def page_not_found(e):
+    return render_template('errors/404.html'), 404
+
+
+def internal_server_error(e):
+    return render_template('errors/500.html'), 500

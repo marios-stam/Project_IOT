@@ -1,4 +1,3 @@
-from datetime import datetime
 from flask_login import UserMixin  # Provides default implementations
 from flask_sqlalchemy import SQLAlchemy
 from . import db
@@ -36,8 +35,7 @@ class User(db.Model, UserMixin):
         db.DateTime,
         index=False,
         unique=False,
-        nullable=False,
-        default=datetime.utcnow
+        nullable=False
     )
     bio = db.Column(
         db.Text,

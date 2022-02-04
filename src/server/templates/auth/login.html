@@ -20,7 +20,7 @@
     <div class="my-4 mx-auto">
       <input type="submit" class="btn btn-primary" value="Submit" />
     </div>
-    <div class="mb-3">No account? <a href="/auth/register">Create one!</a></div>
+    <div class="mb-3">No account? <a href="{{ url_for('auth_blueprint.register') }}">Create one!</a></div>
   </form>
 </div>
 
