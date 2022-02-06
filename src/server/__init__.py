@@ -1,3 +1,5 @@
+from .tasks import scheduler
+from .config import Config
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -6,9 +8,10 @@ from flask_login import LoginManager
 db = SQLAlchemy()
 
 
-def init_app():
+def init_app(config_class=Config):
     """Initialize the core application."""
     app = Flask(__name__, instance_relative_config=False)
+    app.config.from_object(Config)
     # app.config.from_object('config.Config')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.sqlite'
     app.config['SECRET_KEY'] = 'dev'  # Secret key so we can use sessions
@@ -63,6 +66,10 @@ def init_app():
         app.register_error_handler(403, forbidden)
         app.register_error_handler(404, page_not_found)
         app.register_error_handler(500, internal_server_error)
+
+        # Schecule tasks
+        scheduler.init_app(app)
+        scheduler.start()
 
         return app
 
