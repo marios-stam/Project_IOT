@@ -84,3 +84,19 @@ def get_all_bins():
         bins.append(bin)
 
     return jsonify(bins)
+
+
+def get_bins_by_status(status):
+    # Getting all bins with 'status' field is same to parameter status
+    result = db.session.query(Bin).filter(Bin.status == status).all()
+    if(len(result) == 0):
+        return []
+
+    bins = []
+    for i in range(len(result)):
+        bin = result[i].__dict__
+        bin.pop('_sa_instance_state')
+
+        bins.append(bin)
+
+    return bins

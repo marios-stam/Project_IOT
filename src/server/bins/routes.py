@@ -3,7 +3,7 @@ from flask import current_app as app
 from ..models import db, Bin
 from datetime import datetime as dt
 from flask import request, jsonify
-from .db_interface import tested, get_bin, create_bin, update_bin, get_all_bins
+from .db_interface import tested, get_bin, create_bin, update_bin, get_all_bins, get_bins_by_status
 import json
 
 bins_blueprint = Blueprint('bins_blueprint', __name__)
