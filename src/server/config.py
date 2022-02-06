@@ -1,0 +1,6 @@
+class Config(object):
+    # The others config...
+    # The others config...
+
+    # Flask-apscheduler
+    SCHEDULER_API_ENABLED = True

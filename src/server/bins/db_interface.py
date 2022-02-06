@@ -67,3 +67,36 @@ def create_bin(data=None):
     db.session.add(new_bin)
     db.session.commit()
     return make_response(f"New bin created with ID:{new_bin.id}")
+
+
+def get_all_bins():
+    print("Getting all Bins")  # get bin
+
+    result = db.session.query(Bin).all()
+    if(len(result) == 0):
+        return make_response(f"No bin found!")
+
+    bins = []
+    for i in range(len(result)):
+        bin = result[i].__dict__
+        bin.pop('_sa_instance_state')
+
+        bins.append(bin)
+
+    return jsonify(bins)
+
+
+def get_bins_by_status(status):
+    # Getting all bins with 'status' field is same to parameter status
+    result = db.session.query(Bin).filter(Bin.status == status).all()
+    if(len(result) == 0):
+        return []
+
+    bins = []
+    for i in range(len(result)):
+        bin = result[i].__dict__
+        bin.pop('_sa_instance_state')
+
+        bins.append(bin)
+
+    return bins

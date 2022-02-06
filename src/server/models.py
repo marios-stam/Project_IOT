@@ -38,7 +38,7 @@ class User(db.Model, UserMixin):
         nullable=False
     )
     role = db.Column(
-        db.String(4),
+        db.Text,
         index=False,
         unique=False,
         nullable=True
@@ -76,10 +76,16 @@ class Bin(db.Model):
         nullable=False
     )
 
-    position = db.Column(
-        db.String(80),
+    longtitude = db.Column(
+        db.Float,
         nullable=False
     )
+
+    langtitude = db.Column(
+        db.Float,
+        nullable=False
+    )
+
     updated = db.Column(
         db.DateTime,
         index=False,
