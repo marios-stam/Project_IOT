@@ -51,3 +51,18 @@ def create_user(data=None):
     db.session.add(new_user)
     db.session.commit()
     return make_response("POST called")
+
+
+def get_all_users():
+    result = db.session.query(User).all()
+    if(len(result) == 0):
+        return make_response(404, f"No user found")
+
+    users = []
+    for i in range(len(result)):
+
+        user = result[i].__dict__
+        user.pop('_sa_instance_state')
+        users.append(user)
+
+    return jsonify(users)
