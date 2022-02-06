@@ -10,7 +10,6 @@ class ViewForm(FlaskForm):
     username = StringField(label='Username', render_kw={'readonly': True})
     email = StringField(label='Email Address', render_kw={'readonly': True})
     created = StringField(label='Created At', render_kw={'readonly': True})
-    bio = TextAreaField(label='Bio', render_kw={'readonly': True})
 
 
 class EditForm(FlaskForm):
@@ -30,6 +29,3 @@ class EditForm(FlaskForm):
             return
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('Email is already in use.')
-
-    bio = TextAreaField(
-        'Bio', [Length(max=200, message='Bio must be under 200 characters long.')])

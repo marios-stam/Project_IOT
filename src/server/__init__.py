@@ -28,6 +28,7 @@ def init_app(config_class=Config):
         from .trucks import routes
         from .users import routes
         from .auth import routes
+        from .client import routes
         from .profile import routes
         from . import views  # Temp ('index')
 
@@ -37,6 +38,7 @@ def init_app(config_class=Config):
         app.register_blueprint(trucks.routes.trucks_blueprint)
         app.register_blueprint(users.routes.users_blueprint)
         app.register_blueprint(auth.routes.auth_blueprint)
+        app.register_blueprint(client.routes.client_blueprint)
         app.register_blueprint(profile.routes.profile_blueprint)
         app.register_blueprint(views.bp)  # Temp
 
