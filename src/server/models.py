@@ -43,6 +43,14 @@ class User(db.Model, UserMixin):
         unique=False,
         nullable=True
     )
+
+    points = db.Column(
+        db.Integer,
+        index=False,
+        unique=False,
+        nullable=False
+    )
+
     admin = db.Column(
         db.Boolean,
         index=False,
@@ -81,7 +89,7 @@ class Bin(db.Model):
         nullable=False
     )
 
-    langtitude = db.Column(
+    latitude = db.Column(
         db.Float,
         nullable=False
     )
