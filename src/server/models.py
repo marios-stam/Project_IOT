@@ -1,3 +1,5 @@
+from enum import unique
+from multiprocessing import AuthenticationError
 from flask_login import UserMixin  # Provides default implementations
 from flask_sqlalchemy import SQLAlchemy
 from . import db
@@ -64,9 +66,16 @@ class User(db.Model, UserMixin):
 
 class Bin(db.Model):
     __tablename__ = 'Bins'
-    id = db.Column(
+    record_id = db.Column(
         db.Integer,
         primary_key=True,
+        unique=True,
+        autoincrement=True
+    )
+
+    id = db.Column(
+        db.Integer,
+        # primary_key=True,
         unique=False
     )
 
