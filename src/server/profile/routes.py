@@ -5,7 +5,7 @@ from ..models import User
 from .. import db
 from .forms import EditForm, ViewForm
 
-profile_blueprint = Blueprint('profile_blueprint', __name__, url_prefix='/me')
+profile_blueprint = Blueprint('profile_blueprint', __name__, url_prefix='/profile')
 
 
 @profile_blueprint.route('/view')
@@ -24,7 +24,6 @@ def edit():
             user = User.query.get(current_user.id)
             user.username = form.username.data
             user.email = form.email.data
-            user.bio = form.bio.data
             db.session.commit()
             flash(
                 [f'Your profile was successfully updated, {user.username}.'], category='success')

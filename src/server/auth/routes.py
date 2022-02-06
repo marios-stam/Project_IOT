@@ -18,7 +18,7 @@ def logout_required(view):
         if current_user.is_authenticated:
             flash(
                 [f'You are already logged in, {current_user.username}.'], category='warning')
-            return redirect(url_for('views.index'))
+            return redirect(url_for('profile_blueprint.view'))
 
         return view(**kwargs)
 
@@ -32,13 +32,13 @@ def register():
     if request.method == 'POST':
         if form.validate_on_submit():
             user = User(username=form.username.data, email=form.email.data, created=datetime.now(),
-                        password=generate_password_hash(form.password.data), admin=False)
+                        password=generate_password_hash(form.password.data), role='ctzn', admin=False)
             db.session.add(user)
             db.session.commit()
             flash([f'Thanks for registering. You are now logged in.'],
                   category='success')
             login_user(user, remember=True)
-            return redirect(url_for('views.index'))
+            return redirect(url_for('profile_blueprint.view'))
 
         for error in form.errors.values():
             flash(error, category='danger')
@@ -64,7 +64,7 @@ def login():
                 login_user(user, remember=True)
                 flash(
                     [f'You were successfully logged in, {user.username}.'], category='success')
-                return redirect(url_for('views.index'))
+                return redirect(url_for('profile_blueprint.view'))
 
         flash(error, category='danger')
 

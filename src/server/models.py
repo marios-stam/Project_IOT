@@ -37,8 +37,8 @@ class User(db.Model, UserMixin):
         unique=False,
         nullable=False
     )
-    bio = db.Column(
-        db.Text,
+    role = db.Column(
+        db.String(4),
         index=False,
         unique=False,
         nullable=True
