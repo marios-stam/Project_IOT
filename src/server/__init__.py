@@ -31,6 +31,7 @@ def init_app(config_class=Config):
         from .client import routes
         from .profile import routes
         from . import views  # Temp ('index')
+        from .reports import routes
 
         # Register Blueprints
         app.register_blueprint(bins.routes.bins_blueprint)
@@ -41,6 +42,7 @@ def init_app(config_class=Config):
         app.register_blueprint(client.routes.client_blueprint)
         app.register_blueprint(profile.routes.profile_blueprint)
         app.register_blueprint(views.bp)  # Temp
+        app.register_blueprint(reports.routes.reports_blueprint)
 
         # Create sql tables from data models
         print("Creating SQL Tables")

@@ -148,3 +148,38 @@ class Truck(db.Model):
 
     def __repr__(self):
         return "Truck:{} at position {} , {} full% ".format(self.username, self.position, self.fullnes)
+
+
+class Report(db.Model):
+    __tablename__ = 'Reports'
+    report_id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        foreign_key='Users.id',
+        nullable=False
+    )
+
+    details = db.Column(
+        db.Text
+    )
+
+    status = db.Column(
+        db.Text,
+        index=False,
+        unique=False,
+        nullable=False
+    )
+
+    updated = db.Column(
+        db.DateTime,
+        index=False,
+        unique=False,
+        nullable=False
+    )
+
+    def __repr__(self):
+        return "Report:{} from user_id:{} ".format(self.report_id, self.user_id)
