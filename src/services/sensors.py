@@ -2,6 +2,7 @@ from multiprocessing import Process, Pipe
 from uuid import uuid4
 from utils import *
 import requests
+import json
 
 # =========== CONSTANTS ===========
 ARRAY_SIZE = 5                              # Number of bins in infrastructure
@@ -9,10 +10,10 @@ CENTER_POS = {
     'x': 38.246639,
     'y': 21.734573
 }                                           # Center position to randomly scatter bins
-FILL_RATE = 0.05                            # Fill rate (each interval)
+FILL_RATE = 2.5                             # Fill rate (each interval)
 AMBIENT_TEMP = 25                           # Ambient (starting) temperature
 AUTO_DEATH = 2 * 60 * 60 * 24               # Automatically kill process after (seconds)
-INTERVAL = 5                                # Interval between measurements (seconds)
+INTERVAL = 30                               # Interval between measurements (seconds)
 FIRE_PERC = 0.005                           # Chance of bin catching fire (each interval)
 FIRE_TEMP = 135                             # Temperature of bin when on fire
 TILT_PERC = 0.005                           # Chance of bin being overturned (each interval)
@@ -87,7 +88,7 @@ class Sensor:
                     'fall_status': self.fallen_status,
                     'battery': self.battery,
                     'time_online': int(diff_time(self.start_time, datetime.now())),
-                    'measurement_id': str(uuid4()),
+                    'entry_id': str(uuid4()),
                     'timestamp': datetime.strftime(self.prev_time, '%Y-%m-%d %H:%M:%S.000'),
                     'fill_level': fullness,
                     'temperature': temp,
@@ -98,11 +99,13 @@ class Sensor:
                 self.history.append(msg)
                 # self.history = [msg]
 
+                # Fix for transmission
+                msg['orientation'] = json.dumps(msg['orientation'])
                 try:
-                    requests.put(SERVER_IP + "/bins", data=msg)
+                    requests.put(SERVER_IP + "/bins", json=msg)
                     print("Sent message to server at", msg['timestamp'])
-                except Exception as e:
-                    print(e)
+                except requests.exceptions.ConnectionError:
+                    print("Server unreachable")
 
             if pipe.poll(INTERVAL * 0.1):
                 cmd = pipe.recv()
