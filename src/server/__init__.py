@@ -6,7 +6,7 @@ from flask_login import LoginManager
 # Globally accessible libraries
 db = SQLAlchemy()
 
-from .tasks import scheduler
+from .tasks import scheduler # This line must be run after the initialization of db
 
 def init_app(config_class=Config):
     """Initialize the core application."""

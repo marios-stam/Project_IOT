@@ -50,7 +50,7 @@ class User(db.Model, UserMixin):
         db.Integer,
         index=False,
         unique=False,
-        nullable=False
+        default=0
     )
 
     admin = db.Column(
