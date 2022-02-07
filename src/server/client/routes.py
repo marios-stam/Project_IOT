@@ -14,9 +14,18 @@ def ctzn():
         abort(403)
     return render_template('client/ctzn.html')
 
+
 @client_blueprint.route('/drvr')
 @login_required
 def drvr():
     if User.query.get(current_user.id).role != 'drvr':
         abort(403)
     return render_template('client/drvr.html')
+
+
+@client_blueprint.route('/mngr')
+@login_required
+def mngr():
+    if User.query.get(current_user.id).role != 'mngr':
+        abort(403)
+    return render_template('client/mngr.html')

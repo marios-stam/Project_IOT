@@ -1,18 +1,18 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
-from ..models import User
 from .. import db
-from .forms import EditForm, ViewForm
+from ..models import User
+from .forms import EditForm
 
-profile_blueprint = Blueprint('profile_blueprint', __name__, url_prefix='/profile')
+profile_blueprint = Blueprint(
+    'profile_blueprint', __name__, url_prefix='/profile')
 
 
 @profile_blueprint.route('/view')
 @login_required
 def view():
-    form = ViewForm()
-    return render_template('profile/view.html', form=form)
+    return render_template('profile/view.html')
 
 
 @profile_blueprint.route('/edit', methods=('GET', 'POST'))
