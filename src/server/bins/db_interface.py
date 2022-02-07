@@ -64,13 +64,13 @@ def create_bin(data=None):
     if data == None:
         data = request.get_json()
 
-    data['updated'] = dt.now()  # set created date
+    # data['updated'] = dt.now()  # set created date
     new_bin = Bin(**data)
 
     # add to database
     db.session.add(new_bin)
     db.session.commit()
-    return make_response(f"New bin created with ID:{new_bin.id}")
+    return make_response(f"New bin created with ID:{new_bin.entry_id}")
 
 
 def get_all_bins():

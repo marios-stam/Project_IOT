@@ -66,46 +66,75 @@ class User(db.Model, UserMixin):
 
 class Bin(db.Model):
     __tablename__ = 'Bins'
-    record_id = db.Column(
+    sensor_id = db.Column(
+        db.Text,
+        unique=False,
+        nullable=False
+    )
+
+    lat = db.Column(
+        db.Float,
+        unique=False,
+        nullable=False
+    )
+
+    long = db.Column(
+        db.Float,
+        unique=False,
+        nullable=False
+    )
+
+    fall_status = db.Column(
+        db.Boolean,
+        unique=False,
+        nullable=True
+    )
+
+    battery = db.Column(
+        db.Float,
+        unique=False,
+        nullable=True
+    )
+
+    time_online = db.Column(
         db.Integer,
-        primary_key=True,
+        unique=False,
+        nullable=False
+    )
+
+    entry_id = db.Column(
+        db.Text,
         unique=True,
-        autoincrement=True
+        nullable=False,
+        primary_key=True
     )
 
-    id = db.Column(
-        db.Integer,
-        # primary_key=True,
-        unique=False
-    )
-
-    status = db.Column(
-        db.Integer,
-        index=False,
+    timestamp = db.Column(
+        db.Text,
         unique=False,
         nullable=False
     )
 
-    fullness = db.Column(
-        db.Integer,
-        index=False,
+    fill_level = db.Column(
+        db.Float,
         unique=False,
-        nullable=False
+        nullable=True
     )
 
-    longtitude = db.Column(
+    temperature = db.Column(
         db.Float,
-        nullable=False
+        unique=False,
+        nullable=True
     )
 
-    latitude = db.Column(
-        db.Float,
-        nullable=False
+    fire_status = db.Column(
+        db.Boolean,
+        unique=False,
+        nullable=True
     )
 
-    updated = db.Column(
-        db.DateTime,
-        index=False,
+    orientation = db.Column(
+        db.Text,
         unique=False,
         nullable=True
     )
