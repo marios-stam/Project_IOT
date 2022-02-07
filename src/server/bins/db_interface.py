@@ -3,6 +3,7 @@ from flask import current_app as app
 from ..models import db, Bin
 from datetime import datetime as dt
 from flask import request, jsonify
+import geopy.distance
 
 
 def tested():
@@ -31,12 +32,15 @@ def update_bin(bin_id=None):
     id = data['id']
     status = data['status']
     fullness = data['fullness']
-    position = data['position']
+    longtitude = data['longtitude']
+    latitude = data['latitude']
+
     updated = dt.now()
 
     print("status:", status)
     print("fullness:", fullness)
-    print("position:", position)
+    print("longtitude:", longtitude)
+    print("latitude:", latitude)
     print("updated:", updated)
 
     result = db.session.query(Bin).filter(Bin.id == id).all()
@@ -100,3 +104,39 @@ def get_bins_by_status(status):
         bins.append(bin)
 
     return bins
+
+
+def get_bins_in_radius(pos, radius):
+    # Getting all bins within radius
+    # pos--> (long, lat)
+    # radius--> in km
+
+    result = db.session.query(Bin).all()
+    if(len(result) == 0):
+        return make_response(f"No bin found!")
+
+    bins = []
+    for i in range(len(result)):
+        bin = result[i].__dict__
+        bin_pos = (bin['longtitude'], bin['latitude'])
+        distance = geopy.distance.distance(pos, bin_pos).km
+
+        if distance <= radius:
+            bin.pop('_sa_instance_state')
+            bins.append(bin)
+
+    return jsonify(bins)
+
+
+def get_bin_history(id, n):
+    # Getting last n bins of a specific bin id
+    result = db.session.query(Bin).filter(
+        Bin.id == id).order_by(Bin.updated.desc()).limit(n).all()
+
+    bins = []
+    for i in range(len(result)):
+        bin = result[i].__dict__
+        bin.pop('_sa_instance_state')
+        bins.append(bin)
+
+    return jsonify(bins)

@@ -1,0 +1,18 @@
+[
+  {
+    "truck_id": "truck_id1",
+    "waypoints": [
+      { "loc_id": "truck_loc0", "lon": 9.997, "lat": 53.551 },
+      { "loc_id": "test_loc0", "lon": 9.999, "lat": 53.552 },
+      { "loc_id": "test_loc1", "lon": 9.998, "lat": 53.553 }
+    ]
+  },
+  {
+    "truck_id": "truck_id2",
+    "waypoints": [
+      { "loc_id": "truck_loc1", "lon": 11.57, "lat": 48.144 },
+      { "loc_id": "test_loc2", "lon": 11.57, "lat": 48.145 },
+      { "loc_id": "test_loc3", "lon": 11.56, "lat": 48.146 }
+    ]
+  }
+]

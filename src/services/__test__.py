@@ -1,5 +1,5 @@
-from src.services import utils
+from src.services import utils, fill_regressor
 
 
 if __name__ == '__main__':
-    utils.graph_rand_history()
+    fill_regressor.evaluator()

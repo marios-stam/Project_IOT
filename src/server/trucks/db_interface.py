@@ -51,3 +51,20 @@ def create_truck(data=None):
     db.session.add(new_truck)
     db.session.commit()
     return make_response(f"New truck created with ID:{new_truck.id}")
+
+
+def get_all_reports():
+    print("Getting all Reports")  # get bin
+
+    result = db.session.query(Bin).all()
+    if(len(result) == 0):
+        return make_response(f"No bin found!")
+
+    bins = []
+    for i in range(len(result)):
+        bin = result[i].__dict__
+        bin.pop('_sa_instance_state')
+
+        bins.append(bin)
+
+    return jsonify(bins)

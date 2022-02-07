@@ -1,3 +1,5 @@
+from enum import unique
+from multiprocessing import AuthenticationError
 from flask_login import UserMixin  # Provides default implementations
 from flask_sqlalchemy import SQLAlchemy
 from . import db
@@ -43,6 +45,14 @@ class User(db.Model, UserMixin):
         unique=False,
         nullable=True
     )
+
+    points = db.Column(
+        db.Integer,
+        index=False,
+        unique=False,
+        default=0
+    )
+
     admin = db.Column(
         db.Boolean,
         index=False,
@@ -56,9 +66,16 @@ class User(db.Model, UserMixin):
 
 class Bin(db.Model):
     __tablename__ = 'Bins'
-    id = db.Column(
+    record_id = db.Column(
         db.Integer,
         primary_key=True,
+        unique=True,
+        autoincrement=True
+    )
+
+    id = db.Column(
+        db.Integer,
+        # primary_key=True,
         unique=False
     )
 
@@ -81,7 +98,7 @@ class Bin(db.Model):
         nullable=False
     )
 
-    langtitude = db.Column(
+    latitude = db.Column(
         db.Float,
         nullable=False
     )
@@ -131,3 +148,38 @@ class Truck(db.Model):
 
     def __repr__(self):
         return "Truck:{} at position {} , {} full% ".format(self.username, self.position, self.fullnes)
+
+
+class Report(db.Model):
+    __tablename__ = 'Reports'
+    report_id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        foreign_key='Users.id',
+        nullable=False
+    )
+
+    details = db.Column(
+        db.Text
+    )
+
+    status = db.Column(
+        db.Text,
+        index=False,
+        unique=False,
+        nullable=False
+    )
+
+    updated = db.Column(
+        db.DateTime,
+        index=False,
+        unique=False,
+        nullable=False
+    )
+
+    def __repr__(self):
+        return "Report:{} from user_id:{} ".format(self.report_id, self.user_id)
