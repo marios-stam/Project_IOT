@@ -16,7 +16,7 @@ def create_user_route():
 
 @users_blueprint.route('/users', methods=['PUT'])  # update a user
 def update_user_route():
-    "Update whatever value of user wtih given id you want"
+    # Update whatever value of user wtih given id you want
     return update_user()
 
 

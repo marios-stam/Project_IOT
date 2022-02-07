@@ -1,0 +1,1 @@
+{"vehicles": [{"vehicle_id": "fortigo", "start_address": {"location_id": "truck_loc", "lon": 13.406, "lat": 52.537}}], "services": [{"id": "0", "name": "test0", "address": {"location_id": "test_loc0", "lon": 9.999, "lat": 53.552}}, {"id": "1", "name": "test1", "address": {"location_id": "test_loc1", "lon": 11.57, "lat": 48.145}}]}
