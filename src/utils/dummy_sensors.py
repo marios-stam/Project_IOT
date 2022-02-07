@@ -184,6 +184,10 @@ class Sensor:
                     n = int(cmd.split()[1])
                     pipe.send(self.history[-n:][::-1])
 
+                if cmd == 'toggle_fire': self.fire_status = not self.fire_status
+
+                if cmd == 'toggle_fall': self.fallen_status = not self.fire_status
+
 
 class SensorGateway:
     def __init__(self):

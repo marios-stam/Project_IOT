@@ -1,0 +1,1 @@
+web: python ./src/utils/dummy_sensors.py
