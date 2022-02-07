@@ -12,7 +12,7 @@
     "email": "John.Doe@upatras.gr",	
     "password": "123456789",
     "created": "Thu, 16 Dec 2021 12:20:10 GMT",
-    "bio": "",
+    "role": "",
     "admin": false
 }
 

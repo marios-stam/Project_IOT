@@ -1,0 +1,11 @@
+{% extends "base.html" %} {% block title %} Internal Server Error {% endblock %}
+{% block head %} {% endblock %} {% block content %}
+
+<h1>Internal Server Error</h1>
+
+<p>Oops... We encountered an unexpected condition, sorry!</p> 
+<p>
+  <a href="{{ url_for('views.index') }}">Go somewhere nice instead.</a>
+</p>
+
+{% endblock %}

@@ -1,8 +1,11 @@
+from enum import unique
+from multiprocessing import AuthenticationError
+from flask_login import UserMixin  # Provides default implementations
 from flask_sqlalchemy import SQLAlchemy
 from . import db
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     """Data model for user accounts."""
 
     __tablename__ = 'Users'
@@ -36,12 +39,20 @@ class User(db.Model):
         unique=False,
         nullable=False
     )
-    bio = db.Column(
+    role = db.Column(
         db.Text,
         index=False,
         unique=False,
         nullable=True
     )
+
+    points = db.Column(
+        db.Integer,
+        index=False,
+        unique=False,
+        nullable=False
+    )
+
     admin = db.Column(
         db.Boolean,
         index=False,
@@ -55,9 +66,16 @@ class User(db.Model):
 
 class Bin(db.Model):
     __tablename__ = 'Bins'
-    id = db.Column(
+    record_id = db.Column(
         db.Integer,
         primary_key=True,
+        unique=True,
+        autoincrement=True
+    )
+
+    id = db.Column(
+        db.Integer,
+        # primary_key=True,
         unique=False
     )
 
@@ -75,10 +93,16 @@ class Bin(db.Model):
         nullable=False
     )
 
-    position = db.Column(
-        db.String(80),
+    longtitude = db.Column(
+        db.Float,
         nullable=False
     )
+
+    latitude = db.Column(
+        db.Float,
+        nullable=False
+    )
+
     updated = db.Column(
         db.DateTime,
         index=False,

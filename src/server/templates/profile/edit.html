@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% block title %} Your Profile {% endblock %} {% block
+head %} {% endblock %} {% block content %}
+
+<div class="container my-4" style="max-width: 540px">
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.username.label }} {{ form.username(class="form-control",
+      value=current_user.username) }}
+    </div>
+    <div class="mb-3">
+      {{ form.email.label }} {{ form.email(class="form-control",
+      value=current_user.email) }}
+    </div>
+    <div class="my-4 mx-auto">
+      <input type="submit" class="btn btn-primary" value="Submit" />
+    </div>
+  </form>
+</div>
+
+{% endblock %}
