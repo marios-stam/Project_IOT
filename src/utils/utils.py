@@ -35,3 +35,30 @@ def rand_check(chance: float) -> bool:
     if not is_perc(perc) or not is_perc(chance):
         raise Exception("Number is not percentage")
     return perc > (1 - chance)
+
+
+class AccelData:
+    def __init__(self, x=0.0, y=0.0, z=0.0):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def __add__(self, p):
+        self.x += p.x
+        self.y += p.y
+        self.z += p.z
+
+    def __sub__(self, p):
+        self.x -= p.x
+        self.y -= p.y
+        self.z -= p.z
+
+    def __mul__(self, k: float):
+        self.x *= k
+        self.y *= k
+        self.z *= k
+
+    def __iter__(self):
+        yield 'x', self.x
+        yield 'y', self.y
+        yield 'z', self.z
