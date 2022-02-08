@@ -26,11 +26,33 @@
 
   <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('views.index') }}"
-          >CleanerCity</a
+    <nav
+      class="navbar navbar-expand-lg navbar-light bg-light mb-3 border-3 border-bottom"
+    >
+      <div class="container">
+        {% if current_user.role == 'ctzn' or not current_user.is_authenticated
+        %}
+        <a
+          class="btn btn-outline-primary me-3"
+          href="{{ url_for('client_blueprint.ctzn') }}"
+          role="button"
+          >CleanerCity App</a
         >
+        {% elif current_user.role == 'drvr' %}
+        <a
+          class="btn btn-outline-primary me-3"
+          href="{{ url_for('client_blueprint.drvr') }}"
+          role="button"
+          >CleanerCity App</a
+        >
+        {% elif current_user.role == 'mngr' %}
+        <a
+          class="btn btn-outline-primary me-3"
+          href="{{ url_for('client_blueprint.mngr') }}"
+          role="button"
+          >CleanerCity App</a
+        >
+        {% endif %}
         <button
           class="navbar-toggler"
           type="button"
@@ -48,6 +70,11 @@
               <a class="nav-link" href="{{ url_for('views.index') }}">Home</a>
             </li>
             {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('profile_blueprint.view') }}"
+                >Profile</a
+              >
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('auth_blueprint.logout') }}"
                 >Logout</a
@@ -68,11 +95,13 @@
             </li>
             {% endif %}
           </ul>
-          <span class="navbar-text">
-            <a class="nav-link" href="{{ url_for('profile_blueprint.view') }}"
-              >{{ current_user.username }}</a
-            >
-          </span>
+          {% if current_user.is_authenticated %}
+          <span class="navbar-text"
+            >You are logged in as:
+            <strong>{{ current_user.username }}</strong> | Reward points:
+            <strong>{{ current_user.points }}</strong></span
+          >
+          {% endif %}
         </div>
       </div>
     </nav>
@@ -82,7 +111,7 @@
       <!-- Alerts -->
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %}
-      <div class="mb-3 mx-auto" style="max-width: 540px">
+      <div class="mb-3 mx-auto" style="max-width: 440px">
         {% for category, message in messages %}
         <div
           class="m-0 alert alert-{{ category }} alert-dismissible fade show text-start"

@@ -41,6 +41,75 @@
   </head>
 
   <body>
+    <nav
+      class="navbar navbar-expand-lg navbar-light bg-light border-3 border-top fixed-bottom"
+    >
+      <div class="container">
+        <a
+          class="btn btn-outline-primary me-3"
+          href="{{ url_for('views.index') }}"
+          role="button"
+          >Home Page</a
+        >
+        <label
+          >Radius for bins:
+          <select class="bin-radius" name="bin-radius">
+            <option value="1">1 km</option>
+            <option value="0.5">0.5 km</option>
+            <option value="0.25">0.25 km</option>
+            <option value="0.125">0.125 km</option>
+          </select>
+        </label>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('profile_blueprint.view') }}"
+                >Profile</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('auth_blueprint.logout') }}"
+                >Logout</a
+              >
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('auth_blueprint.login') }}"
+                >Login</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{{ url_for('auth_blueprint.register') }}"
+                >Register</a
+              >
+            </li>
+            {% endif %}
+          </ul>
+          {% if current_user.is_authenticated %}
+          <span class="navbar-text"
+            >You are logged in as:
+            <strong>{{ current_user.username }}</strong> | Reward points:
+            <strong>{{ current_user.points }}</strong></span
+          >
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+
     <div id="map"></div>
 
     <!-- Bootstrap Bundle with Popper; near the end of pages -->

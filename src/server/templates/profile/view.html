@@ -1,73 +1,91 @@
 {% extends "base.html" %} {% block title %} Your Profile {% endblock %} {% block
 head %} {% endblock %} {% block content %}
 
-<div class="container my-4" style="max-width: 540px">
-  <div class="mb-3">
-    {{ form.username.label }} {{ form.username(class="form-control-plaintext",
-    value=current_user.username) }}
-  </div>
-  <div class="mb-3">
-    {{ form.email.label }} {{ form.email(class="form-control-plaintext",
-    value=current_user.email) }}
-  </div>
-  <div class="mb-3">
-    {{ form.created.label }} {{ form.created(class="form-control-plaintext",
-    value=current_user.created.strftime("%m/%d/%Y, %H:%M:%S")) }}
-  </div>
-  <div class="my-4 mx-auto">
-    <a
-      class="btn btn-primary"
-      href="{{ url_for('profile_blueprint.edit') }}"
-      role="button"
-      >Edit Profile</a
-    >
-    <!-- Button trigger modal -->
-    <button
-      type="button"
-      class="btn btn-danger"
-      data-bs-toggle="modal"
-      data-bs-target="#modal"
-    >
-      Delete Profile
-    </button>
+<div>
+  <img src="{{ url_for('static', filename='images/keep-clean.png') }}" />
+  <h1>Your Profile</h1>
+  <span>Review your CleanerCity account.</span>
+</div>
 
-    <!-- Modal -->
-    <div
-      class="modal fade"
-      id="modal"
-      tabindex="-1"
-      aria-labelledby="modalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalLabel">Deleting your profile</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            This is permanent. Do you want to proceed?
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancel
-            </button>
-            <a
-              class="btn btn-danger"
-              href="{{ url_for('profile_blueprint.delete') }}"
-              role="button"
-              >Delete</a
-            >
-          </div>
+<div class="container my-4" style="max-width: 440px">
+  <table class="table align-middle table-hover">
+    <thead>
+      <tr>
+        <th scope="col" colspan="2">Your Personal Information</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Username</th>
+        <td>{{ current_user.username }}</td>
+      </tr>
+      <tr>
+        <th scope="row">Email Address</th>
+        <td>{{ current_user.email }}</td>
+      </tr>
+      <tr>
+        <th scope="row">Created At</th>
+        <td>{{ current_user.created.strftime("%m/%d/%Y, %H:%M:%S") }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="my-5 mx-auto row">
+    <div class="col-6">
+      <a
+        class="btn btn-primary w-100"
+        href="{{ url_for('profile_blueprint.edit') }}"
+        role="button"
+        >Edit Profile</a
+      >
+    </div>
+    <div class="col-6">
+      <!-- Button trigger modal -->
+      <button
+        type="button"
+        class="btn btn-danger w-100"
+        data-bs-toggle="modal"
+        data-bs-target="#modal"
+      >
+        Delete Profile
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="modal"
+    tabindex="-1"
+    aria-labelledby="modalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabel">Deleting your profile</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">This is permanent. Do you want to proceed?</div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <a
+            class="btn btn-danger"
+            href="{{ url_for('profile_blueprint.delete') }}"
+            role="button"
+            >Delete</a
+          >
         </div>
       </div>
     </div>

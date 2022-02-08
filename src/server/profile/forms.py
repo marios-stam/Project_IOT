@@ -1,15 +1,9 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField
+from wtforms import StringField
 from wtforms.validators import Email, InputRequired, Length, ValidationError
 
 from ..models import User
-
-
-class ViewForm(FlaskForm):
-    username = StringField(label='Username', render_kw={'readonly': True})
-    email = StringField(label='Email Address', render_kw={'readonly': True})
-    created = StringField(label='Created At', render_kw={'readonly': True})
 
 
 class EditForm(FlaskForm):
