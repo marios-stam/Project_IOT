@@ -1,19 +1,26 @@
 from matplotlib import pyplot as plt
-import numpy as np
-from src.services.utils import rand_history
-import json
+from .utils import rand_history
 from random import shuffle
+import requests
 
 
-def get_sensor_history(sensor_id, iters=150):
-    return rand_history(id=sensor_id, hours=500)
-
-
-def fill_regressor(sensor_id):
+def fill_regressor(sensor_id, iters=150, method="web"):
     n = 1
     counter = 0
     sum = 0
-    for d in get_sensor_history(sensor_id):
+
+    if method == 'web':
+        resp = requests.get(SERVER_IP + '/bins_history', params={'sensor_id': sensor_id, 'n': iters})
+        if resp.status_code != 200:
+            data = resp.json()
+        else:
+            resp.raise_for_status()
+    elif method == 'sim':
+        data = rand_history(id=sensor_id, hours=500)
+    else:
+        return
+
+    for d in data:
         if d < 1:
             n = 1
             continue
@@ -38,7 +45,7 @@ def evaluator():
 
         preds = fill_regressor(str(id))
         ax0 = f.add_subplot(321 + i)
-        tmp = get_sensor_history(str(id))
+        tmp = rand_history(id=str(id), hours=500)
         ax0.plot(range(len(tmp)), tmp, label="sim " + str(id + 1))
 
         for d, n in zip(tmp, range(len(tmp))):

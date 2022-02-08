@@ -1,11 +1,9 @@
-from flask import Flask
-from flask_restful import Resource, Api, abort
-from sensors import *
+from flask_restful import Resource, abort
+from .__config__ import SERVER_IP
+from .sensor_classes import SensorGateway
 
-
-# =========== FLASK ===========
-app = Flask(__name__)
-api = Api(app)
+# Creating gateway
+gateway = SensorGateway(server=SERVER_IP)
 
 
 # =========== RESOURCE CLASSES ===========
@@ -49,16 +47,3 @@ class AllSensors(Resource):
 class Kill(Resource):
     def get(self):
         pass
-
-
-if __name__ == '__main__':
-    # Routing RESTful API endpoints
-    api.add_resource(Sensors, '/sensor/<string:sensor_id>', '/sensor')
-    api.add_resource(Measurements, '/measurement/<string:sensor_id>', '/measurement/<string:sensor_id>/<int:count>')
-    api.add_resource(AllSensors, '/sensor_list')
-
-    # Creating gateway
-    gateway = SensorGateway()
-
-    # Running Flask server
-    app.run(debug=True, port=26223)
