@@ -5,7 +5,7 @@ import json
 from random import shuffle
 
 
-def get_sensor_history(sensor_id):
+def get_sensor_history(sensor_id, iters=150):
     return rand_history(id=sensor_id, hours=500)
 
 
