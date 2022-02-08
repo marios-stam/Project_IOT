@@ -1,19 +1,14 @@
 from flask import make_response
 from ..models import db, Regression
-from flask import request, jsonify
+from flask import jsonify
 from datetime import datetime
-import requests
-from ..fill_regressor import fill_regressor as fr
+from src.server.regression.fill_regressor import fill_regressor as fr
 from ..utils import diff_time
+from ..__config__ import REFRESH_INTERVAL, NUM_MEASUREMENTS
 
 
 def get_angle(sensor_id):
     result = db.session.query(Regression).filter(Regression.sensor_id == sensor_id).all()
-
-    # Regression
-    # refresh_interval = 6 * 60 * 60    # 6 hours
-    refresh_interval = 5 * 60           # 5 minutes
-    num_measurements = 150
 
     if len(result) > 0:
         print(f"Gettind data of bin: {sensor_id} ...")
@@ -23,7 +18,17 @@ def get_angle(sensor_id):
 
         t1 = datetime.strptime(data['timestamp'][:-4], '%Y-%m-%d %H:%M:%S')
         delay = diff_time(t1, datetime.now())
-    if len(result) <= 0 or delay > refresh_interval:
-        fr(sensor_id, num_measurements)
+    if len(result) <= 0 or delay > REFRESH_INTERVAL:
+        data = {
+            'sensor_id': sensor_id,
+            'angle': fr(sensor_id, NUM_MEASUREMENTS),
+            'timestamp': datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+        }
+    if len(result) <= 0:
+        # Create new DB entry for the sensor with the above data
+        pass
+    else:
+        # Update existon entry with the above angle
+        pass
 
     return make_response(jsonify(data))

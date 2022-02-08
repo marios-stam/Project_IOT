@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
-from .utils import rand_history
+from src.server.utils import rand_history
 from random import shuffle
-import requests
+from ..bins.db_interface import get_bin_history
 
 
 def fill_regressor(sensor_id, iters=150, method="web"):
@@ -10,11 +10,7 @@ def fill_regressor(sensor_id, iters=150, method="web"):
     sum = 0
 
     if method == 'web':
-        resp = requests.get(SERVER_IP + '/bins_history', params={'sensor_id': sensor_id, 'n': iters})
-        if resp.status_code != 200:
-            data = resp.json()
-        else:
-            resp.raise_for_status()
+        raw = get_bin_history(sensor_id, iters)
     elif method == 'sim':
         data = rand_history(id=sensor_id, hours=500)
     else:

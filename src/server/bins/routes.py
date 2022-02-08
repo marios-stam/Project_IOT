@@ -62,5 +62,4 @@ def get_bin_history_route():
     n = request.args.get('n', type=int)
     print("id:", id, "n:", n)
 
-    # return get_bin_history(id, n)
-    return make_response(f"{id} {n}")
+    return get_bin_history(id, n)
