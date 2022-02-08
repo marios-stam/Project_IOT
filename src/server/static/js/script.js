@@ -40,74 +40,106 @@ var yellowIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-// Initialize map
-var map = L.map("map");
-var mbAttr =
-  '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
-var mbUrl =
-  "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}";
-var grayscale = L.tileLayer(mbUrl, {
-  id: "mapbox/light-v10",
-  tileSize: 512,
-  zoomOffset: -1,
-  attribution: mbAttr,
-  accessToken:
-    "pk.eyJ1IjoicXdlcnRxd2VydCIsImEiOiJja3o5em84aHEwMWFuMnZwZjlyNmRjOG16In0.LQhfH1fxUa4Vds54POk2Xw",
-});
-var streets = L.tileLayer(mbUrl, {
-  id: "mapbox/streets-v11",
-  tileSize: 512,
-  zoomOffset: -1,
-  attribution: mbAttr,
-  accessToken:
-    "pk.eyJ1IjoicXdlcnRxd2VydCIsImEiOiJja3o5em84aHEwMWFuMnZwZjlyNmRjOG16In0.LQhfH1fxUa4Vds54POk2Xw",
-});
-grayscale.addTo(map);
+var map, grayscale, streets;
+initializeMap().then(findLocation);
+
+async function initializeMap() {
+  map = L.map("map");
+  var mbAttr =
+    '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+  var mbUrl =
+    "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}";
+  grayscale = L.tileLayer(mbUrl, {
+    id: "mapbox/light-v10",
+    tileSize: 512,
+    zoomOffset: -1,
+    attribution: mbAttr,
+    accessToken:
+      "pk.eyJ1IjoicXdlcnRxd2VydCIsImEiOiJja3o5em84aHEwMWFuMnZwZjlyNmRjOG16In0.LQhfH1fxUa4Vds54POk2Xw",
+  });
+  streets = L.tileLayer(mbUrl, {
+    id: "mapbox/streets-v11",
+    tileSize: 512,
+    zoomOffset: -1,
+    attribution: mbAttr,
+    accessToken:
+      "pk.eyJ1IjoicXdlcnRxd2VydCIsImEiOiJja3o5em84aHEwMWFuMnZwZjlyNmRjOG16In0.LQhfH1fxUa4Vds54POk2Xw",
+  });
+  grayscale.addTo(map);
+}
 
 // Geolocation
-map.locate({ setView: true, maxZoom: 16 });
+async function findLocation() {
+  map.locate({ setView: true, maxZoom: 16 });
+  map.on("locationfound", onLocationFound);
+  map.on("locationerror", onLocationError);
+}
 function onLocationFound(e) {
   var radius = e.accuracy;
   L.marker(e.latlng).addTo(map).bindPopup("You are here").openPopup();
   L.circle(e.latlng, radius).addTo(map);
+  getBins(e.latlng)
+    .then(setInterval(updateBins, 10000))
+    .catch((error) => {
+      alert(
+        "Oops! Error while retrieving bins information. Please try again later."
+      );
+      console.log(error);
+    });
 }
-map.on("locationfound", onLocationFound);
 function onLocationError(e) {
   alert(e.message);
+  map.setView([51.505, -0.09], 13);
+  L.marker([51.5, -0.09]).addTo(map);
+  getBins({ lng: -0.09, lat: 51.505 })
+    .then(setInterval(updateBins, 10000))
+    .catch((error) => {
+      alert(
+        "Oops! Error while retrieving bins information. Please try again later."
+      );
+      console.log(error);
+    });
 }
-map.on("locationerror", onLocationError);
-
-// Clicking on map and see coordinates
-// var popup = L.popup();
-// function onMapClick(e) {
-//   popup
-//     .setLatLng(e.latlng)
-//     .setContent("You clicked the map at " + e.latlng.toString())
-//     .openOn(map);
-// }
-// map.on("click", onMapClick);
+//*/ map.setView(loc, 18);
 
 // Create bin layer groups
-var greenBins = L.layerGroup();
-var yellowBins = L.layerGroup();
-var orangeBins = L.layerGroup();
-var redBins = L.layerGroup();
+var greenLayerGroup = L.layerGroup();
+var yellowLayerGroup = L.layerGroup();
+var orangeLayerGroup = L.layerGroup();
+var redLayerGroup = L.layerGroup();
+
+// Create GeoJSON layers
+var greenGeoJSONLayer, yellowGeoJSONLayer, orangeGeoJSONLayer, redGeoJSONLayer;
 
 // Fetch bins list, then create corresponding markers, then create the layers controls
-fetch("/")
-  .then((response) => response.json())
-  .then((data) => {
-    data.forEach(this.createBinMarkers);
-  })
-  .then(() => {
-    this.createLayersControl();
-  });
-
-// Create marker and add to layer group, according to bin fullness
+var r = 1;
+var latlong;
+async function getBins(loc) {
+  latlong = loc;
+  fetch("/bins_in_radius?long=" + loc.lng + "&lat=" + loc.lat + "&radius=" + r)
+    .then((response) => response.json())
+    .then((data) => {
+      data.forEach(this.createBinMarkers);
+    })
+    .then(() => {
+      this.createLayersControl();
+    });
+}
 function createBinMarkers(obj, index, array) {
-  var fullness = obj.properties.fullness;
+  var geoJSON = {
+    type: "Feature",
+    properties: {
+      fullness: obj.fullness,
+      id: obj.id,
+      record_id: obj.record_id,
+      status: obj.status,
+      updated: obj.updated,
+    },
+    geometry: { type: "Point", coordinates: [obj.longtitude, obj.latitude] },
+  };
+  var fullness = obj.fullness;
   if (fullness <= 40) {
-    L.geoJSON(obj, {
+    greenGeoJSONLayer = L.geoJSON(geoJSON, {
       pointToLayer: function (geoJsonPoint, latlng) {
         return L.marker(latlng, { icon: greenIcon });
       },
@@ -125,9 +157,9 @@ function createBinMarkers(obj, index, array) {
           "</p>"
         );
       })
-      .addTo(greenBins);
+      .addTo(greenLayerGroup);
   } else if (fullness <= 60) {
-    L.geoJSON(obj, {
+    yellowGeoJSONLayer = L.geoJSON(geoJSON, {
       pointToLayer: function (geoJsonPoint, latlng) {
         return L.marker(latlng, { icon: yellowIcon });
       },
@@ -145,9 +177,9 @@ function createBinMarkers(obj, index, array) {
           "</p>"
         );
       })
-      .addTo(yellowBins);
+      .addTo(yellowLayerGroup);
   } else if (fullness <= 80) {
-    L.geoJSON(obj, {
+    orangeGeoJSONLayer = L.geoJSON(geoJSON, {
       pointToLayer: function (geoJsonPoint, latlng) {
         return L.marker(latlng, { icon: orangeIcon });
       },
@@ -165,9 +197,9 @@ function createBinMarkers(obj, index, array) {
           "</p>"
         );
       })
-      .addTo(orangeBins);
+      .addTo(orangeLayerGroup);
   } else {
-    L.geoJSON(obj, {
+    redGeoJSONLayer = L.geoJSON(geoJSON, {
       pointToLayer: function (geoJsonPoint, latlng) {
         return L.marker(latlng, { icon: redIcon });
       },
@@ -185,22 +217,58 @@ function createBinMarkers(obj, index, array) {
           "</p>"
         );
       })
-      .addTo(redBins);
+      .addTo(redLayerGroup);
   }
 }
-
-// Create the layers control to switch between different base layers and switch overlays
 function createLayersControl() {
-  greenBins.addTo(map);
-  yellowBins.addTo(map);
-  orangeBins.addTo(map);
-  redBins.addTo(map);
+  greenLayerGroup.addTo(map);
+  yellowLayerGroup.addTo(map);
+  orangeLayerGroup.addTo(map);
+  redLayerGroup.addTo(map);
   var baseLayers = { Grayscale: grayscale, Streets: streets };
   var overlays = {
-    "0% - 40%": greenBins,
-    "40% - 60%": yellowBins,
-    "60% - 80%": orangeBins,
-    "80% - 100%": redBins,
+    "0% - 40%": greenLayerGroup,
+    "40% - 60%": yellowLayerGroup,
+    "60% - 80%": orangeLayerGroup,
+    "80% - 100%": redLayerGroup,
   };
   L.control.layers(baseLayers, overlays).addTo(map);
 }
+
+// Update bins information repeatedly, with a 10 seconds delay between.
+async function updateBins() {
+  const response = await fetch(
+    "/bins_in_radius?long=" +
+      latlong.lng +
+      "&lat=" +
+      latlong.lat +
+      "&radius=" +
+      r
+  );
+  const data = await response.json();
+  greenGeoJSONLayer.clearLayers();
+  greenLayerGroup.clearLayers();
+  yellowGeoJSONLayer.clearLayers();
+  yellowLayerGroup.clearLayers();
+  orangeGeoJSONLayer.clearLayers();
+  orangeLayerGroup.clearLayers();
+  redGeoJSONLayer.clearLayers();
+  redLayerGroup.clearLayers();
+  data.forEach(this.createBinMarkers);
+}
+
+// Clicking on map and see coordinates
+function onMapClick(e) {
+  L.popup()
+    .setLatLng(e.latlng)
+    .setContent("You clicked the map at " + e.latlng.toString())
+    .openOn(map);
+}
+map.on("click", onMapClick);
+//*/
+
+// Change radius of search
+document.querySelector(".bin-radius").addEventListener("change", (event) => {
+  r = event.target.value;
+  updateBins();
+});
