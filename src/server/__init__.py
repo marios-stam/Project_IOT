@@ -47,7 +47,7 @@ def init_app(config_class=Config):
         app.register_blueprint(views.bp)  # Temp
         app.register_blueprint(reports.routes.reports_blueprint)
         app.register_blueprint(regression.routes.regression_blueprint)
-        app.register_blueprint(bounty.routes.bounty_blueprint)
+        app.register_blueprint(bounty.routes.bounties_blueprint)
 
         # Create sql tables from data models
         print("Creating SQL Tables")
