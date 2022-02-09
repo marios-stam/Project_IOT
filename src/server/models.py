@@ -164,10 +164,18 @@ class Truck(db.Model):
         nullable=False
     )
 
-    position = db.Column(
-        db.String(80),
+    lat = db.Column(
+        db.Float,
+        unique=False,
         nullable=False
     )
+
+    long = db.Column(
+        db.Float,
+        unique=False,
+        nullable=False
+    )
+
     updated = db.Column(
         db.DateTime,
         index=False,

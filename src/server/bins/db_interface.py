@@ -90,9 +90,14 @@ def get_all_bins():
     return jsonify(bins)
 
 
-def get_bins_by_status(status):
+def get_bins_by_status(status, get_latest_values=True):
     # Getting all bins with 'status' field is same to parameter status
-    result = db.session.query(Bin).filter(Bin.status == status).all()
+    if get_latest_values:
+        result = db.session.query(Bin).filter(
+            Bin.status == status).order_by(Bin.timestamp.desc()).first()  # get the latest record
+    else:
+        result = db.session.query(Bin).filter(Bin.status == status).all()
+
     if(len(result) == 0):
         return []
 

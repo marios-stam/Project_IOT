@@ -22,3 +22,8 @@ def update_truck_route():
 @trucks_blueprint.route('/trucks/<truck_id>', methods=['GET'])  # get a truck
 def get_truck_route(truck_id):
     return get_truck(truck_id)
+
+
+@trucks_blueprint.route('/trucks/fleet_routing', methods=['GET'])
+def get_trucks_routing_route():
+    return get_trucks_routing()

@@ -1,0 +1,14 @@
+// for trucks
+{
+  "id": 1,
+  "status": "available",
+  "long": 9.997 ,
+  "lat": 53.551
+}
+
+{
+    "id": 2,
+    "status": "available",
+    "long": 11.57,
+    "lat": 48.144
+}

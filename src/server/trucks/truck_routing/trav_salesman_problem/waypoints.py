@@ -4,7 +4,7 @@ from unittest import result
 
 def extract_waypoints_from_result():
     # load json file
-    result_file_name = r"src\server\truck_routing\trav_salesman_problem\result.json"
+    result_file_name = r"src\server\trucks\truck_routing\trav_salesman_problem\result.json"
     with open(result_file_name) as f:
         data = json.load(f)
 
