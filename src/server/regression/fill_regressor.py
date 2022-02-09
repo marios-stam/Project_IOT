@@ -1,3 +1,4 @@
+from tracemalloc import start
 from ..bins.db_interface import get_bin_history
 from datetime import datetime
 from ..utils import diff_time
@@ -6,20 +7,22 @@ from ..utils import diff_time
 def fill_regressor(sensor_id, iters=150):
     counter = 0
     sum = 0
-    start_time = None
+    prev_time = None
+    prev = None
 
-    data = get_bin_history(sensor_id, iters).json[::-1]
+    data = get_bin_history(sensor_id, iters).json
     for d in data:
-        if d['fill_level'] < 0.01 or start_time is None:
-            start_time = datetime.strptime(d['timestamp'][:-4], '%Y-%m-%d %H:%M:%S')
-            continue
 
         if d['fill_level'] > 0.99:
             continue
-        
-        t = diff_time(start_time, datetime.strptime(d['timestamp'][:-4], '%Y-%m-%d %H:%M:%S'))
-        print(t)
-        sum += d['fill_level'] / t
-        counter += 1
+
+        if not (d['fill_level'] < 0.01 or prev_time is None or prev is None):
+            ang = (d['fill_level'] - prev) / (d['time_online'] - prev_time)
+            print(ang)
+            sum += ang
+            counter += 1
+
+        prev = d['fill_level']
+        prev_time = d['time_online']
 
     return sum / counter
