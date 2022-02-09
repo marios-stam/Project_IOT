@@ -34,64 +34,66 @@ class Sensor:
         self.process = Process(target=self.loop, args=(pipe, ))
         self.server = server
 
+    def update(self):
+        # Set fill level
+        self.fullness += FILL_RATE * (1 + 0.2 * rand_perc(center=True))
+        self.fullness = min(self.fullness, 1.0)
+
+        # Set temperature
+        if rand_check(FIRE_PERC):
+            self.fire_status = not self.fire_status
+        if self.fire_status:
+            temp = FIRE_TEMP + (60 * rand_perc())
+        else:
+            temp = AMBIENT_TEMP + (8 * rand_perc())
+
+        # Set tilt
+        if rand_check(TILT_PERC):
+            self.fallen_status = not self.fallen_status
+        if self.fallen_status:
+            tilt = AccelData(0, 9.81, 0)
+        else:
+            tilt = AccelData(0, 0, 9.81)
+
+        # Set battery
+        self.battery -= BATTERY_RATE * (1 + 0.2 * rand_perc(center=True))
+        self.battery = max(self.battery, 0.0)
+
+        # Reset previous time
+        self.prev_time = datetime.now()
+
+        msg = {
+            'sensor_id': self.sensor_id,
+            'lat': self.lat,
+            'long': self.long,
+            'fall_status': self.fallen_status,
+            'battery': self.battery,
+            'time_online': int(diff_time(self.start_time, datetime.now())),
+            'entry_id': str(uuid4()),
+            'timestamp': datetime.strftime(self.prev_time, '%Y-%m-%d %H:%M:%S.000'),
+            'fill_level': self.fullness,
+            'temperature': temp,
+            'fire_status': self.fire_status,
+            'orientation': dict(tilt)
+        }
+
+        self.history.append(msg)
+        # self.history = [msg]
+
+        # Fix for transmission
+        msg['orientation'] = json.dumps(msg['orientation'])
+        try:
+            requests.put(self.server + "/bins", json=msg)
+            print("Sent message to server at", msg['timestamp'])
+        except requests.exceptions.ConnectionError:
+            print("Server unreachable")
+
     def loop(self, pipe):
-        fullness = rand_perc()
+        self.fullness = rand_perc()
 
         while True:
             if diff_time(self.prev_time, datetime.now()) > INTERVAL:
-
-                # Set fill level
-                fullness += FILL_RATE * (1 + 0.2 * rand_perc(center=True))
-                fullness = min(fullness, 1.0)
-
-                # Set temperature
-                if rand_check(FIRE_PERC):
-                    self.fire_status = not self.fire_status
-                if self.fire_status:
-                    temp = FIRE_TEMP + (60 * rand_perc())
-                else:
-                    temp = AMBIENT_TEMP + (8 * rand_perc())
-
-                # Set tilt
-                if rand_check(TILT_PERC):
-                    self.fallen_status = not self.fallen_status
-                if self.fallen_status:
-                    tilt = AccelData(0, 9.81, 0)
-                else:
-                    tilt = AccelData(0, 0, 9.81)
-
-                # Set battery
-                self.battery -= BATTERY_RATE * (1 + 0.2 * rand_perc(center=True))
-                self.battery = max(self.battery, 0.0)
-
-                # Reset previous time
-                self.prev_time = datetime.now()
-
-                msg = {
-                    'sensor_id': self.sensor_id,
-                    'lat': self.lat,
-                    'long': self.long,
-                    'fall_status': self.fallen_status,
-                    'battery': self.battery,
-                    'time_online': int(diff_time(self.start_time, datetime.now())),
-                    'entry_id': str(uuid4()),
-                    'timestamp': datetime.strftime(self.prev_time, '%Y-%m-%d %H:%M:%S.000'),
-                    'fill_level': fullness,
-                    'temperature': temp,
-                    'fire_status': self.fire_status,
-                    'orientation': dict(tilt)
-                }
-
-                self.history.append(msg)
-                # self.history = [msg]
-
-                # Fix for transmission
-                msg['orientation'] = json.dumps(msg['orientation'])
-                try:
-                    requests.put(self.server + "/bins", json=msg)
-                    print("Sent message to server at", msg['timestamp'])
-                except requests.exceptions.ConnectionError:
-                    print("Server unreachable")
+                self.update()
 
             if pipe.poll(INTERVAL * 0.1):
                 cmd = pipe.recv()
@@ -104,16 +106,28 @@ class Sensor:
                         'time_online': int(diff_time(self.start_time, datetime.now())),
                         'last_measurement': datetime.strftime(self.prev_time, '%d/%m/%Y %H:%M:%S')
                     })
+                    continue
 
                 if cmd.startswith('get_measurements'):
                     n = int(cmd.split()[1])
                     pipe.send(self.history[-n:][::-1])
+                    continue
 
                 if cmd == 'toggle_fire':
                     self.fire_status = not self.fire_status
+                if cmd == 'on_fire':
+                    self.fire_status = True
+                if cmd == 'off_fire':
+                    self.fire_status = False
 
                 if cmd == 'toggle_fall':
                     self.fallen_status = not self.fire_status
+                if cmd == 'on_fall':
+                    self.fallen_status = True
+                if cmd == 'off_fall':
+                    self.fallen_status = False
+
+                pipe.send(self.history[-1:][::-1])
 
 
 class SensorGateway:
@@ -139,10 +153,19 @@ class SensorGateway:
     def get_sensor_IDs(self):
         return list(self.sensors.keys())
 
-    def get_last_measurements(self, sensor_id, n=1):
+    def send_msg(self, sensor_id, msg):
         pipe = self.pipes[sensor_id]
-        pipe.send('get_measurements ' + str(min(n, MAX_MEASURE_PER_REQ)))
+        pipe.send(msg)
         return pipe.recv()
+
+    def get_last_measurements(self, sensor_id, n=1):
+        return self.send_msg(sensor_id, 'get_measurements ' + str(min(n, MAX_MEASURE_PER_REQ)))
+
+    def toggle_fire(self, sensor_id):
+        return self.send_msg(sensor_id, 'toggle_fire')
+
+    def toggle_fall(self, sensor_id):
+        return self.send_msg(sensor_id, 'toggle_fall')
 
     def get_sensor_details(self, sensor_id):
         pipe = self.pipes[sensor_id]

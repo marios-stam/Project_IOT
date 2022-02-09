@@ -47,3 +47,12 @@ class AllSensors(Resource):
 class Kill(Resource):
     def get(self):
         pass
+
+class SensorSendMessage(Resource):
+    def post(self, sensor_id, msg):
+        if sensor_id in gateway.get_sensor_IDs():
+            return gateway.send_msg(sensor_id, msg), 200
+        elif sensor_id is None or msg is None:
+            abort(400, message="No ID or Message provided")
+        else:
+            abort(404, message=f"Sensor with ID {sensor_id} doesn't exist")

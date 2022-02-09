@@ -18,7 +18,6 @@ def fill_regressor(sensor_id, iters=150):
 
         if not (d['fill_level'] < 0.01 or prev_time is None or prev is None):
             ang = (d['fill_level'] - prev) / (d['time_online'] - prev_time)
-            print(ang)
             sum += ang
             counter += 1
 
