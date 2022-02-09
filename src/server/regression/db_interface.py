@@ -8,7 +8,8 @@ from ..__config__ import REFRESH_INTERVAL, NUM_MEASUREMENTS
 
 
 def get_angle(sensor_id):
-    result = db.session.query(Regression).filter(Regression.sensor_id == sensor_id).all()
+    result = db.session.query(Regression).filter(
+        Regression.sensor_id == sensor_id).all()
 
     if len(result) > 0:
         print(f"Gettind data of bin: {sensor_id} ...")
@@ -26,9 +27,15 @@ def get_angle(sensor_id):
         }
     if len(result) <= 0:
         # Create new DB entry for the sensor with the above data
-        pass
+        new_regression = Regression(**data)
+
+        # add to database
+        db.session.add(new_regression)
+        db.session.commit()
     else:
         # Update existon entry with the above angle
-        pass
+        result[0].angle = data['angle']
+        result[0].timestamp = data['timestamp']
+        db.session.commit()
 
     return make_response(jsonify(data))
