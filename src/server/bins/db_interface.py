@@ -1,9 +1,9 @@
-from flask import Blueprint, make_response
-from flask import current_app as app
+from flask import make_response
 from ..models import db, Bin
 from datetime import datetime as dt
 from flask import request, jsonify
 import geopy.distance
+from datetime import datetime
 
 
 def tested():
@@ -131,7 +131,7 @@ def get_bins_in_radius(pos, radius):
 def get_bin_history(id, n):
     # Getting last n bins of a specific bin id
     result = db.session.query(Bin).filter(
-        Bin.id == id).order_by(Bin.updated.desc()).limit(n).all()
+        Bin.sensor_id == id).order_by(Bin.timestamp.desc()).limit(n).all()
 
     bins = []
     for i in range(len(result)):

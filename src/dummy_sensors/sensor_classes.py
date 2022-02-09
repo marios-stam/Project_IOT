@@ -1,31 +1,15 @@
 from multiprocessing import Process, Pipe
 from uuid import uuid4
-from utils import *
+from .utils import *
 import requests
 import json
-
-# =========== CONSTANTS ===========
-ARRAY_SIZE = 5                              # Number of bins in infrastructure
-CENTER_POS = {
-    'x': 38.246639,
-    'y': 21.734573
-}                                           # Center position to randomly scatter bins
-FILL_RATE = 2.5                             # Fill rate (each interval)
-AMBIENT_TEMP = 25                           # Ambient (starting) temperature
-AUTO_DEATH = 2 * 60 * 60 * 24               # Automatically kill process after (seconds)
-INTERVAL = 30                               # Interval between measurements (seconds)
-FIRE_PERC = 0.005                           # Chance of bin catching fire (each interval)
-FIRE_TEMP = 135                             # Temperature of bin when on fire
-TILT_PERC = 0.005                           # Chance of bin being overturned (each interval)
-BATTERY_RATE = 0.007                        # Rate at which battery is depleted (each interval)
-MAX_MEASURE_PER_REQ = 10                    # Maximum measurements returned per request
-SERVER_IP = "http://31.208.108.233:5000/"   # Central server IP address
+from .__config__ import *
 
 
 class Sensor:
     interval = 60 ** 2
 
-    def __init__(self, pipe, sensor_id, position=None):
+    def __init__(self, pipe, sensor_id, server, position=None):
 
         # Initialize sensor data
         self.sensor_id = sensor_id
@@ -46,7 +30,9 @@ class Sensor:
         self.lat += 0.06 * rand_perc(center=True)
         self.long += 0.06 * rand_perc(center=True)
 
+        # Initialize structure
         self.process = Process(target=self.loop, args=(pipe, ))
+        self.server = server
 
     def loop(self, pipe):
         fullness = rand_perc()
@@ -102,7 +88,7 @@ class Sensor:
                 # Fix for transmission
                 msg['orientation'] = json.dumps(msg['orientation'])
                 try:
-                    requests.put(SERVER_IP + "/bins", json=msg)
+                    requests.put(self.server + "/bins", json=msg)
                     print("Sent message to server at", msg['timestamp'])
                 except requests.exceptions.ConnectionError:
                     print("Server unreachable")
@@ -131,7 +117,7 @@ class Sensor:
 
 
 class SensorGateway:
-    def __init__(self):
+    def __init__(self, server):
         super().__init__()
 
         self.history = []
@@ -141,9 +127,12 @@ class SensorGateway:
         for i in range(ARRAY_SIZE):
             tmp_id = str(uuid4())
             parent, child = Pipe()
-            self.sensors[tmp_id] = Sensor(child, tmp_id)
+            self.sensors[tmp_id] = Sensor(child, tmp_id, server)
             self.pipes[tmp_id] = parent
 
+        # self.start_processes()
+
+    def start_processes(self):
         for sensor in self.sensors:
             self.sensors[sensor].process.start()
 
