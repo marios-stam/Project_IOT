@@ -2,7 +2,6 @@ from flask import make_response
 from ..models import db, Regression
 from flask import jsonify
 from datetime import datetime
-from src.server.regression.fill_regressor import fill_regressor as fr
 from ..utils import diff_time
 from ..__config__ import REFRESH_INTERVAL, NUM_MEASUREMENTS
 

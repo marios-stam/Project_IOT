@@ -268,13 +268,13 @@ class Bounty(db.Model):
     )
 
     points = db.Column(
-        db.Ingeter,
+        db.Integer,
         unique=False,
         nullable=False
     )
 
     assigned_usr_id = db.Column(
-        db.Ingeter,
+        db.Integer,
         unique=False,
         nullable=True
     )
@@ -286,7 +286,7 @@ class Bounty(db.Model):
     )
 
     completed = db.Column(
-        db.Ingeter,
+        db.Integer,
         unique=False,
         nullable=False
     )
