@@ -4,6 +4,7 @@ from flask import jsonify
 from datetime import datetime as dt
 from ..utils import diff_time
 from ..__config__ import REFRESH_INTERVAL, NUM_MEASUREMENTS
+import geopy.distance
 
 
 def get_bounty(bounty_id=None):
@@ -56,7 +57,7 @@ def create_bounty(data=None):
 
 
 def get_all_bounties():
-    print("Getting all Bounties")  # get bin
+    print("Getting all Bounties")
 
     result = db.session.query(Bounty).all()
     if(len(result) == 0):
@@ -68,5 +69,28 @@ def get_all_bounties():
         bounty.pop('_sa_instance_state')
 
         bounties.append(bounty)
+
+    return jsonify(bounties)
+
+
+def get_uncompleted_bounties_in_radius(pos, radius):
+    # Getting all bounties within radius
+    # pos--> (long, lat)
+    # radius--> in km
+
+    result = db.session.query(Bounty).filter(Bounty.completed == False).all()
+
+    if(len(result) == 0):
+        return make_response(f"No bounty found!")
+
+    bounties = []
+    for i in range(len(result)):
+        bounty = result[i].__dict__
+        bounty_pos = (bounty['long'], bounty['lat'])
+        distance = geopy.distance.distance(pos, bounty_pos).km
+
+        if distance <= radius:
+            bounty.pop('_sa_instance_state')
+            bounties.append(bounty)
 
     return jsonify(bounties)

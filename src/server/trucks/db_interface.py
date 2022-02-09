@@ -57,21 +57,21 @@ def create_truck(data=None):
     return make_response(f"New truck created with ID:{new_truck.id}")
 
 
-def get_all_reports():
-    print("Getting all Reports")  # get bin
+def get_all_trucks():
+    print("Getting all Trucks")
 
-    result = db.session.query(Bin).all()
+    result = db.session.query(Truck).all()
     if(len(result) == 0):
-        return make_response(f"No bin found!")
+        return make_response(f"No truck found!")
 
-    bins = []
+    trucks = []
     for i in range(len(result)):
-        bin = result[i].__dict__
-        bin.pop('_sa_instance_state')
+        truck = result[i].__dict__
+        truck.pop('_sa_instance_state')
 
-        bins.append(bin)
+        trucks.append(truck)
 
-    return jsonify(bins)
+    return jsonify(trucks)
 
 
 def get_all_available_trucks():
