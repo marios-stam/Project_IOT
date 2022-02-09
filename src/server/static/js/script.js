@@ -1,274 +1,149 @@
-// Color markers
-var redIcon = new L.Icon({
-  iconUrl:
-    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-var greenIcon = new L.Icon({
-  iconUrl:
-    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-var orangeIcon = new L.Icon({
-  iconUrl:
-    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-var yellowIcon = new L.Icon({
-  iconUrl:
-    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
-var map, grayscale, streets;
-initializeMap().then(findLocation);
-
-async function initializeMap() {
-  map = L.map("map");
-  var mbAttr =
-    '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
-  var mbUrl =
-    "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}";
-  grayscale = L.tileLayer(mbUrl, {
-    id: "mapbox/light-v10",
-    tileSize: 512,
-    zoomOffset: -1,
-    attribution: mbAttr,
-    accessToken:
-      "pk.eyJ1IjoicXdlcnRxd2VydCIsImEiOiJja3o5em84aHEwMWFuMnZwZjlyNmRjOG16In0.LQhfH1fxUa4Vds54POk2Xw",
-  });
-  streets = L.tileLayer(mbUrl, {
-    id: "mapbox/streets-v11",
-    tileSize: 512,
-    zoomOffset: -1,
-    attribution: mbAttr,
-    accessToken:
-      "pk.eyJ1IjoicXdlcnRxd2VydCIsImEiOiJja3o5em84aHEwMWFuMnZwZjlyNmRjOG16In0.LQhfH1fxUa4Vds54POk2Xw",
-  });
-  grayscale.addTo(map);
-}
-
-// Geolocation
-async function findLocation() {
-  map.locate({ setView: true, maxZoom: 16 });
-  map.on("locationfound", onLocationFound);
-  map.on("locationerror", onLocationError);
-}
-function onLocationFound(e) {
-  var radius = e.accuracy;
-  L.marker(e.latlng).addTo(map).bindPopup("You are here").openPopup();
-  L.circle(e.latlng, radius).addTo(map);
-  getBins(e.latlng)
-    .then(setInterval(updateBins, 10000))
-    .catch((error) => {
-      alert(
-        "Oops! Error while retrieving bins information. Please try again later."
-      );
-      console.log(error);
-    });
-}
-function onLocationError(e) {
-  alert(e.message);
-  map.setView([51.505, -0.09], 13);
-  L.marker([51.5, -0.09]).addTo(map);
-  getBins({ lng: -0.09, lat: 51.505 })
-    .then(setInterval(updateBins, 10000))
-    .catch((error) => {
-      alert(
-        "Oops! Error while retrieving bins information. Please try again later."
-      );
-      console.log(error);
-    });
-}
-//*/ map.setView(loc, 18);
-
-// Create bin layer groups
-var greenLayerGroup = L.layerGroup();
-var yellowLayerGroup = L.layerGroup();
-var orangeLayerGroup = L.layerGroup();
-var redLayerGroup = L.layerGroup();
-
-// Create GeoJSON layers
-var greenGeoJSONLayer, yellowGeoJSONLayer, orangeGeoJSONLayer, redGeoJSONLayer;
-
-// Fetch bins list, then create corresponding markers, then create the layers controls
+var userLong, userLat;
 var r = 1;
-var latlong;
-async function getBins(loc) {
-  latlong = loc;
-  fetch("/bins_in_radius?long=" + loc.lng + "&lat=" + loc.lat + "&radius=" + r)
-    .then((response) => response.json())
-    .then((data) => {
-      data.forEach(this.createBinMarkers);
-    })
-    .then(() => {
-      this.createLayersControl();
-    });
-}
-function createBinMarkers(obj, index, array) {
-  var geoJSON = {
-    type: "Feature",
-    properties: {
-      fullness: obj.fullness,
-      id: obj.id,
-      record_id: obj.record_id,
-      status: obj.status,
-      updated: obj.updated,
-    },
-    geometry: { type: "Point", coordinates: [obj.longtitude, obj.latitude] },
-  };
-  var fullness = obj.fullness;
-  if (fullness <= 40) {
-    greenGeoJSONLayer = L.geoJSON(geoJSON, {
-      pointToLayer: function (geoJsonPoint, latlng) {
-        return L.marker(latlng, { icon: greenIcon });
-      },
-    })
-      .bindPopup(function (layer) {
-        return (
-          "<h6> Bin ID: " +
-          layer.feature.properties.id +
-          "</h6><p>Status: " +
-          layer.feature.properties.status +
-          "</p><p>Updated: " +
-          layer.feature.properties.updated +
-          "</p><p>Fullness: " +
-          layer.feature.properties.fullness +
-          "</p>"
-        );
-      })
-      .addTo(greenLayerGroup);
-  } else if (fullness <= 60) {
-    yellowGeoJSONLayer = L.geoJSON(geoJSON, {
-      pointToLayer: function (geoJsonPoint, latlng) {
-        return L.marker(latlng, { icon: yellowIcon });
-      },
-    })
-      .bindPopup(function (layer) {
-        return (
-          "<h6> Bin ID: " +
-          layer.feature.properties.id +
-          "</h6><p>Status: " +
-          layer.feature.properties.status +
-          "</p><p>Updated: " +
-          layer.feature.properties.updated +
-          "</p><p>Fullness: " +
-          layer.feature.properties.fullness +
-          "</p>"
-        );
-      })
-      .addTo(yellowLayerGroup);
-  } else if (fullness <= 80) {
-    orangeGeoJSONLayer = L.geoJSON(geoJSON, {
-      pointToLayer: function (geoJsonPoint, latlng) {
-        return L.marker(latlng, { icon: orangeIcon });
-      },
-    })
-      .bindPopup(function (layer) {
-        return (
-          "<h6> Bin ID: " +
-          layer.feature.properties.id +
-          "</h6><p>Status: " +
-          layer.feature.properties.status +
-          "</p><p>Updated: " +
-          layer.feature.properties.updated +
-          "</p><p>Fullness: " +
-          layer.feature.properties.fullness +
-          "</p>"
-        );
-      })
-      .addTo(orangeLayerGroup);
-  } else {
-    redGeoJSONLayer = L.geoJSON(geoJSON, {
-      pointToLayer: function (geoJsonPoint, latlng) {
-        return L.marker(latlng, { icon: redIcon });
-      },
-    })
-      .bindPopup(function (layer) {
-        return (
-          "<h6> Bin ID: " +
-          layer.feature.properties.id +
-          "</h6><p>Status: " +
-          layer.feature.properties.status +
-          "</p><p>Updated: " +
-          layer.feature.properties.updated +
-          "</p><p>Fullness: " +
-          layer.feature.properties.fullness +
-          "</p>"
-        );
-      })
-      .addTo(redLayerGroup);
+
+// Get and set the map's access token
+mapboxgl.accessToken =
+  "pk.eyJ1IjoicXdlcnRxd2VydCIsImEiOiJja3o5em84aHEwMWFuMnZwZjlyNmRjOG16In0.LQhfH1fxUa4Vds54POk2Xw";
+
+// Initialize the map
+const map = new mapboxgl.Map({
+  container: "map",
+  style: "mapbox://styles/mapbox/light-v10",
+  center: [21.735, 38.246],
+  zoom: 17,
+});
+
+// Add zoom and rotation controls to the map
+map.addControl(new mapboxgl.NavigationControl());
+
+// Add custom control for bin radius to the map
+class BinRadiusControl {
+  onAdd(map) {
+    this._map = map;
+    this._container = document.createElement("div");
+    this._container.className = "mapboxgl-ctrl";
+    this._container.innerHTML =
+      "<div class='border rounded border-2 p-2 bg-gradient bg-light' style='border-color: #d1d1d0;'><label>Radius for bins: <select class='bin-radius' name='bin-radius'><option value='1'>1000 m</option><option value='0.5'>500 m</option><option value='0.25'>250 m</option><option value='0.125'>125 m</option></select></label></div>";
+    return this._container;
+  }
+  onRemove() {
+    this._container.parentNode.removeChild(this._container);
+    this._map = undefined;
   }
 }
-function createLayersControl() {
-  greenLayerGroup.addTo(map);
-  yellowLayerGroup.addTo(map);
-  orangeLayerGroup.addTo(map);
-  redLayerGroup.addTo(map);
-  var baseLayers = { Grayscale: grayscale, Streets: streets };
-  var overlays = {
-    "0% - 40%": greenLayerGroup,
-    "40% - 60%": yellowLayerGroup,
-    "60% - 80%": orangeLayerGroup,
-    "80% - 100%": redLayerGroup,
-  };
-  L.control.layers(baseLayers, overlays).addTo(map);
-}
+map.addControl(new BinRadiusControl(), "top-left");
 
-// Update bins information repeatedly, with a 10 seconds delay between.
-async function updateBins() {
-  const response = await fetch(
-    "/bins_in_radius?long=" +
-      latlong.lng +
-      "&lat=" +
-      latlong.lat +
-      "&radius=" +
-      r
-  );
-  const data = await response.json();
-  greenGeoJSONLayer.clearLayers();
-  greenLayerGroup.clearLayers();
-  yellowGeoJSONLayer.clearLayers();
-  yellowLayerGroup.clearLayers();
-  orangeGeoJSONLayer.clearLayers();
-  orangeLayerGroup.clearLayers();
-  redGeoJSONLayer.clearLayers();
-  redLayerGroup.clearLayers();
-  data.forEach(this.createBinMarkers);
-}
-
-// Clicking on map and see coordinates
-function onMapClick(e) {
-  L.popup()
-    .setLatLng(e.latlng)
-    .setContent("You clicked the map at " + e.latlng.toString())
-    .openOn(map);
-}
-map.on("click", onMapClick);
-//*/
-
-// Change radius of search
-document.querySelector(".bin-radius").addEventListener("change", (event) => {
-  r = event.target.value;
-  updateBins();
+// Geolocation
+const geolocate = new mapboxgl.GeolocateControl({
+  positionOptions: {
+    enableHighAccuracy: true,
+  },
+  trackUserLocation: true,
 });
+map.addControl(geolocate);
+map.on("load", () => {
+  geolocate.trigger();
+});
+geolocate.once("geolocate", (data) => {
+  userLong = data.coords.longitude;
+  userLat = data.coords.latitude;
+  console.log(userLong, userLat);
+  console.log("A geolocate event has occurred.");
+  drawBins();
+});
+geolocate.on("geolocate", (data) => {
+  userLong = data.coords.longitude;
+  userLat = data.coords.latitude;
+});
+// geolocate.on("error", () => {
+//   console.log("An error event has occurred.");
+// });
+// geolocate.on("trackuserlocationstart", () => {
+//   console.log("A trackuserlocationstart event has occurred.");
+// });
+// geolocate.on("trackuserlocationend", () => {
+//   console.log("A trackuserlocationend event has occurred.");
+// });
+
+async function drawBins() {
+  const geojson = await getBins();
+
+  map.addSource("bins", {
+    type: "geojson",
+    data: geojson,
+  });
+
+  map.addLayer({
+    id: "bins",
+    type: "circle",
+    source: "bins",
+    paint: {
+      "circle-radius": {
+        stops: [
+          [12, 2],
+          [20, 20],
+        ],
+      },
+      "circle-color": [
+        "match",
+        ["get", "color"],
+        "green",
+        "#008000",
+        "orange",
+        "#FF8000",
+        "red",
+        "#FF0000",
+        "#FF00FF",
+      ],
+    },
+  });
+
+  document
+    .querySelector(".bin-radius")
+    .addEventListener("change", async (event) => {
+      r = event.target.value;
+      const geojson = await getBins(updateSource);
+      map.getSource("bins").setData(geojson);
+    });
+
+  const updateSource = setInterval(async () => {
+    const geojson = await getBins(updateSource);
+    map.getSource("bins").setData(geojson);
+  }, 10000);
+
+  async function getBins(updateSource) {
+    try {
+      fetchUrl =
+        "/bins_in_radius?long=" + userLong + "&lat=" + userLat + "&radius=" + r;
+      const response = await fetch(fetchUrl);
+      const data = await response.json();
+      let geojson = {
+        type: "FeatureCollection",
+        features: [],
+      };
+      data.forEach((element) => {
+        if (element.fill_level <= 60) {
+          binColor = "green";
+        } else if (element.fill_level <= 80) {
+          binColor = "orange";
+        } else {
+          binColor = "red";
+        }
+        geojson.features.push({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [element.long, element.lat],
+          },
+          properties: {
+            color: binColor,
+          },
+        });
+      });
+      return geojson;
+    } catch (err) {
+      if (updateSource) clearInterval(updateSource);
+      throw new Error(err);
+    }
+  }
+}

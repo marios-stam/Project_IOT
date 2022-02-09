@@ -118,7 +118,7 @@ def get_bins_in_radius(pos, radius):
     bins = []
     for i in range(len(result)):
         bin = result[i].__dict__
-        bin_pos = (bin['longtitude'], bin['latitude'])
+        bin_pos = (bin['long'], bin['lat'])
         distance = geopy.distance.distance(pos, bin_pos).km
 
         if distance <= radius:

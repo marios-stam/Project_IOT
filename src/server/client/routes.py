@@ -15,6 +15,16 @@ def ctzn():
     return render_template('client/ctzn.html')
 
 
+@client_blueprint.route('/ctzn/throw')
+def throw_garbage():
+    pass
+
+
+@client_blueprint.route('/ctzn/charge')
+def charge_sensor():
+    pass
+
+
 @client_blueprint.route('/drvr')
 @login_required
 def drvr():
