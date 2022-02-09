@@ -36,8 +36,14 @@ def fleet_route_optimising(trucks, bins_to_collect):
 
 
 if __name__ == "__main__":
-    trucks = [("truck_id1", 9.997, 53.551), ("truck_id2", 11.57, 48.144)]
-    bins_to_collect = [(9.999, 53.552), (9.998, 53.553),
-                       (11.57, 48.145), (11.56, 48.146)]
+    trucks = [
+        ("truck_id1", 9.997, 53.551),
+        ("truck_id2", 11.57, 48.144)
+    ]
+
+    bins_to_collect = [
+        (9.999, 53.552), (9.998, 53.553),
+        (11.57, 48.145), (11.56, 48.146)
+    ]
 
     fleet_route_optimising(trucks, bins_to_collect)
