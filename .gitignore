@@ -1,2 +1,4 @@
 /src/server/database.sqlite-journal
+/src/server/database.sqlite
 __pycache__/
+.idea/

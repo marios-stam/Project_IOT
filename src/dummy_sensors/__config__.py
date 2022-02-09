@@ -1,4 +1,4 @@
-SERVER_IP = 'http://31.208.108.233:5000/'
+SERVER_IP = 'http://localhost:5000/'
 
 # =========== CONSTANTS ===========
 ARRAY_SIZE = 5                              # Number of bins in infrastructure

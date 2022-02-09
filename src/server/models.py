@@ -237,3 +237,59 @@ class Regression(db.Model):
 
     def __repr__(self):
         return "Predicted angle:{} from sensor_id:{} ".format(self.angle, self.sensor_id)
+
+
+class Bounty(db.Model):
+    __tablename__ = 'Bounty'
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        unique=True,
+        nullable=False,
+        autoincrement=True
+    )
+
+    timestamp = db.Column(
+        db.Text,
+        unique=False,
+        nullable=False
+    )
+
+    bin_id = db.Column(
+        db.Text,
+        unique=False,
+        nullable=True
+    )
+
+    message = db.Column(
+        db.Text,
+        unique=False,
+        nullable=False
+    )
+
+    points = db.Column(
+        db.Ingeter,
+        unique=False,
+        nullable=False
+    )
+
+    assigned_usr_id = db.Column(
+        db.Ingeter,
+        unique=False,
+        nullable=True
+    )
+
+    time_assigned = db.Column(
+        db.Text,
+        unique=False,
+        nullable=False
+    )
+
+    completed = db.Column(
+        db.Ingeter,
+        unique=False,
+        nullable=False
+    )
+
+    def __repr__(self):
+        return "Predicted angle:{} from sensor_id:{} ".format(self.angle, self.sensor_id)
