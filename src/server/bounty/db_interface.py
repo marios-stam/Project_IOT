@@ -1,5 +1,5 @@
 from flask import request, make_response
-from ..models import db, Bounty
+from ..models import db, Bounty, User
 from flask import jsonify
 from datetime import datetime as dt
 from ..utils import diff_time
@@ -49,7 +49,7 @@ def create_bounty(data=None):
         data = request.get_json()
 
     data['timestamp'] = dt.now()  # set created date
-    data['time_assigned'] = dt.now()  # set created date
+    # data['time_assigned'] = dt.now()  # set created date
 
     new_bounty = Bounty(**data)
 
@@ -105,10 +105,14 @@ def get_uncompleted_bounties_in_radius():
 
 
 def assign_bounty(bounty_id, usr_id):
-    # Please fix... this won't work
-    if get_bounty(bounty_id).json is None:
-        # Return HTTP code 404
-        return make_response("ERROR")
+    result = db.session.query(Bounty).filter(Bounty.id == bounty_id).all()
+    if len(result) == 0:
+        return make_response(f"Bounty with id {bounty_id} not found!", 404)
+    elif len(result) > 1:
+        return make_response(f"Multiple bounties with id {bounty_id} were found!", 500)
+    result = result[0].__dict__
+    if result['assigned_usr_id'] is not None:
+        return make_response(f"Bounty with id {bounty_id} is already assigned to a user!", 403)
 
     update_bounty({
         'id': bounty_id,
@@ -120,19 +124,40 @@ def assign_bounty(bounty_id, usr_id):
 
 
 def complete_bounty(bounty_id, usr_id):
-    if get_bounty(bounty_id).json['usr_id'] != usr_id:
-        # Return HTTP code 403
-        return make_response("ERROR")
 
+    # Checks for Bounty row
+    bounty = db.session.query(Bounty).filter(Bounty.id == bounty_id).all()
+    if len(bounty) == 0:
+        return make_response(f"Bounty with id {bounty_id} not found!", 404)
+    if len(bounty) > 1:
+        return make_response(f"Multiple bounties with id {bounty_id} were found!", 500)
+    bounty = bounty[0].__dict__
+    if bounty['assigned_usr_id'] != usr_id:
+        return make_response(f"The user with id {usr_id} is not assigned to this bounty!", 403)
+    if bounty['completed']:
+        return make_response(f"The bounty with id {bounty_id} is already completed!", 403)
+    
+    # Update bounty
     update_bounty({
         'id': bounty_id,
         'completed': True
     })
 
-    return make_response(f"Succesfully assigned {usr_id} to bounty {bounty_id}")
+    # Checks for User row
+    usr = db.session.query(User).filter(User.id == usr_id).all()
+    if len(usr) == 0:
+        return make_response(f"User with id {usr_id} not found!", 404)
+    elif len(usr) > 1:
+        return make_response(f"Multiple users with id {usr_id} were found!", 500)
+    
+    # Update user
+    setattr(usr[0], 'points', usr[0].__dict__['points'] + bounty['points'])
+    db.session.commit()
+
+    return make_response(f"Succesfully closed bounty {bounty_id} and awarded {usr_id} with {bounty['points']} points")
 
 
-def get_uncompleted_bountries_of_user(usr_id):
+def get_uncompleted_bounties_of_user(usr_id):
     result = db.session.query(Bounty).filter(
         Bounty.usr_id == usr_id).filter(Bounty.completed == False).all()
 
