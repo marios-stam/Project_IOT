@@ -17,20 +17,7 @@
       crossorigin="anonymous"
     />
 
-    <!-- Leaflet -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-      crossorigin=""
-    />
-    <script
-      src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-      integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-      crossorigin=""
-    ></script>
-
-    <!-- Mapbox GL JS v2.6 -->
+    <!-- Mapbox GL JS (v2.6) -->
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.js"></script>
     <link
       href="https://api.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.css"
@@ -43,8 +30,10 @@
       href="{{ url_for('static', filename='css/style.css') }}"
     />
 
+    <!-- Page Title -->
     <title>CleanerCity</title>
 
+    <!-- Favicon -->
     <link
       rel="icon"
       type="image/x-icon"
@@ -53,6 +42,7 @@
   </head>
 
   <body>
+    <!-- Navbar -->
     <nav
       class="navbar navbar-expand-lg navbar-light bg-light border-3 border-top fixed-bottom"
     >
@@ -105,14 +95,25 @@
           {% if current_user.is_authenticated %}
           <span class="navbar-text"
             >You are logged in as:
-            <strong>{{ current_user.username }}</strong> | Reward points:
-            <strong>{{ current_user.points }}</strong></span
-          >
-          {% endif %}
+            <strong>{{ current_user.username }}</strong> | {% if
+            current_user.role == 'citizen' %} Reward points:
+            <strong>{{ current_user.points }}</strong>{% elif current_user.role
+            == 'driver' %} User type: <strong>Driver</strong>{% else %} User
+            type: <strong>Manager</strong></span
+          >{% endif %} {% endif %}
         </div>
       </div>
     </nav>
 
+    <!-- Mapbox GL Directions -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css"
+      type="text/css"
+    />
+
+    <!-- Container for map rendering -->
     <div id="map"></div>
 
     <!-- Bootstrap Bundle with Popper; near the end of pages -->
@@ -125,7 +126,7 @@
     <!-- Custom JavaScript -->
     <script
       type="text/javascript"
-      src="{{ url_for('static', filename='js/script.js') }}"
+      src="{{ url_for('static', filename='js/driver.js') }}"
     ></script>
   </body>
 </html>

@@ -140,7 +140,7 @@ class Bin(db.Model):
     )
 
     def __repr__(self):
-        return 'Bin with id:{} --->{} %'.format(self.id, self.fullness)
+        return 'Bin with id:{} --->{} %'.format(self.entry_id, self.fill_level)
 
 
 class Truck(db.Model):
@@ -184,7 +184,7 @@ class Truck(db.Model):
     )
 
     def __repr__(self):
-        return "Truck:{} at position {} , {} full% ".format(self.username, self.position, self.fullnes)
+        return "Truck:{} at position [{},{}] , {} full% ".format(self.id, self.lat, self.long, self.fullness)
 
 
 class Report(db.Model):
