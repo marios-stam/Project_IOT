@@ -76,10 +76,15 @@ def get_all_bounties():
     return jsonify(bounties)
 
 
-def get_uncompleted_bounties_in_radius(pos, radius):
+def get_uncompleted_bounties_in_radius():
     # Getting all bounties within radius
     # pos--> (long, lat)
     # radius--> in km
+
+    # get data from json
+    data = request.get_json()
+    pos = (data['long'], data['lat'])
+    radius = data['radius']
 
     result = db.session.query(Bounty).filter(Bounty.completed == False).all()
 
@@ -99,7 +104,7 @@ def get_uncompleted_bounties_in_radius(pos, radius):
     return jsonify(bounties)
 
 
-def asign_bounty(bounty_id, usr_id):
+def assign_bounty(bounty_id, usr_id):
     # Please fix... this won't work
     if get_bounty(bounty_id).json is None:
         # Return HTTP code 404
@@ -118,10 +123,27 @@ def complete_bounty(bounty_id, usr_id):
     if get_bounty(bounty_id).json['usr_id'] != usr_id:
         # Return HTTP code 403
         return make_response("ERROR")
-    
+
     update_bounty({
         'id': bounty_id,
         'completed': True
     })
 
     return make_response(f"Succesfully assigned {usr_id} to bounty {bounty_id}")
+
+
+def get_uncompleted_bountries_of_user(usr_id):
+    result = db.session.query(Bounty).filter(
+        Bounty.usr_id == usr_id).filter(Bounty.completed == False).all()
+
+    if(len(result) == 0):
+        return make_response(f"No uncompleted bounty found for user with user_id:", usr_id, "!")
+
+    bounties = []
+    for i in range(len(result)):
+        bounty = result[i].__dict__
+        bounty.pop('_sa_instance_state')
+
+        bounties.append(bounty)
+
+    return jsonify(bounties)
