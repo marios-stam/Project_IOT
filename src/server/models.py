@@ -258,7 +258,7 @@ class Bounty(db.Model):
     )
 
     timestamp = db.Column(
-        db.Text,
+        db.DateTime,
         unique=False,
         nullable=False
     )
@@ -294,9 +294,9 @@ class Bounty(db.Model):
     )
 
     time_assigned = db.Column(
-        db.Text,
+        db.DateTime,
         unique=False,
-        nullable=False
+        nullable=True
     )
 
     completed = db.Column(

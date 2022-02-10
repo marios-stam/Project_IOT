@@ -5,6 +5,7 @@ from datetime import datetime as dt
 from ..utils import diff_time
 from ..__config__ import REFRESH_INTERVAL, NUM_MEASUREMENTS
 import geopy.distance
+from datetime import datetime
 
 
 def get_bounty(bounty_id=None):
@@ -21,8 +22,10 @@ def get_bounty(bounty_id=None):
         return make_response(data_json)
 
 
-def update_bounty(bounty_id=None):
-    data = request.get_json()
+def update_bounty(data=None):
+    if data is None:
+        data = request.get_json()
+
     id = data['id']
     result = db.session.query(Bounty).filter(Bounty.id == id).all()
     if(len(result) == 0):
@@ -94,3 +97,31 @@ def get_uncompleted_bounties_in_radius(pos, radius):
             bounties.append(bounty)
 
     return jsonify(bounties)
+
+
+def asign_bounty(bounty_id, usr_id):
+    # Please fix... this won't work
+    if get_bounty(bounty_id).json is None:
+        # Return HTTP code 404
+        return make_response("ERROR")
+
+    update_bounty({
+        'id': bounty_id,
+        'time_assigned': datetime.now(),
+        'assigned_usr_id': usr_id
+    })
+
+    return make_response(f"Succesfully assigned {usr_id} to bounty {bounty_id}")
+
+
+def complete_bounty(bounty_id, usr_id):
+    if get_bounty(bounty_id).json['usr_id'] != usr_id:
+        # Return HTTP code 403
+        return make_response("ERROR")
+    
+    update_bounty({
+        'id': bounty_id,
+        'completed': True
+    })
+
+    return make_response(f"Succesfully assigned {usr_id} to bounty {bounty_id}")
