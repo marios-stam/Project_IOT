@@ -1,3 +1,4 @@
+import os
 from .trav_salesman_problem import get_waypoints_for_each_truck
 from .mapbox import calculate_route_from_waypoints
 import json
@@ -33,7 +34,7 @@ def fleet_route_optimising(trucks, bins_to_collect):
 
         total_result.append(dictionary)
 
-    total_result_file_name = r"src/server/trucks/truck_routing/total_result.json"
+    total_result_file_name = os.path.join(os.getcwd(), "server/trucks/truck_routing/total_result.json")
     with open(total_result_file_name, 'w') as outfile:
         outfile.write(json.dumps(total_result))
 

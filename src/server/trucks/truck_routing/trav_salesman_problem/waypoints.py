@@ -1,10 +1,11 @@
 import json
+import os
 from unittest import result
 
 
 def extract_waypoints_from_result():
     # load json file
-    result_file_name = r"src\server\trucks\truck_routing\trav_salesman_problem\result.json"
+    result_file_name = os.path.join(os.getcwd(), "server/trucks/truck_routing/trav_salesman_problem/result.json")
     with open(result_file_name) as f:
         data = json.load(f)
 
