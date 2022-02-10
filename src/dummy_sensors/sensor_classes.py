@@ -27,8 +27,8 @@ class Sensor:
         else:
             self.lat = CENTER_POS['x']
             self.long = CENTER_POS['y']
-        self.lat += 0.06 * rand_perc(center=True)
-        self.long += 0.06 * rand_perc(center=True)
+        self.lat += SCATTER * rand_perc(center=True)
+        self.long += SCATTER * rand_perc(center=True)
 
         # Initialize structure
         self.process = Process(target=self.loop, args=(pipe, ))

@@ -6,6 +6,7 @@ CENTER_POS = {
     'x': 38.246639,
     'y': 21.734573
 }                                           # Center position to randomly scatter bins
+SCATTER = 0.02                              # Scatter parameter for positioning arround the center
 FILL_RATE = 0.05                            # Fill rate (each interval)
 AMBIENT_TEMP = 25                           # Ambient (starting) temperature
 AUTO_DEATH = 2 * 60 * 60 * 24               # Automatically kill process after (seconds)
