@@ -94,15 +94,15 @@ def get_trucks_routing():
     trucks = get_all_available_trucks()
     if trucks == None:
         return make_response(f"No available truck found!")
-    trucks = [(truck.id, truck.long, truck.lat) for truck in trucks]
+    trucks = [(truck['id'], truck['long'], truck['lat']) for truck in trucks]
 
     # get all bins that need service from a truck
     # not sure if this is the right status
-    bins = get_bins_by_status("need_truck")
+    bins = get_bins_by_status("need_truck", False)
     if bins == None:
         return make_response(f"No bin needs truck service!")
 
-    bins = [(bin.long, bin.lat) for bin in bins]
+    bins = [(bin['long'], bin['lat']) for bin in bins]
 
     # solve travellings salesman problem and get routes for each truck
-    fleet_route_optimising(trucks, bins)
+    return jsonify(fleet_route_optimising(trucks, bins))

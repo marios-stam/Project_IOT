@@ -98,8 +98,8 @@
             <strong>{{ current_user.username }}</strong> | {% if
             current_user.role == 'citizen' %} Reward points:
             <strong>{{ current_user.points }}</strong>{% elif current_user.role
-            == 'driver' %} User type: <strong>Driver</strong>{% else %} User type:
-            <strong>Manager</strong></span
+            == 'driver' %} User type: <strong>Driver</strong>{% else %} User
+            type: <strong>Manager</strong></span
           >{% endif %} {% endif %}
         </div>
       </div>
@@ -115,6 +115,24 @@
 
     <!-- Container for map rendering -->
     <div id="map"></div>
+
+    <div
+      class="offcanvas offcanvas-start"
+      tabindex="-1"
+      id="offcanvasRight"
+      aria-labelledby="offcanvasRightLabel"
+    >
+      <div class="offcanvas-header">
+        <h5 id="offcanvasRightLabel">Bounties</h5>
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="offcanvas-body">edw tha mpoun bounties</div>
+    </div>
 
     <!-- Bootstrap Bundle with Popper; near the end of pages -->
     <script

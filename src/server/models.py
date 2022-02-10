@@ -72,6 +72,13 @@ class Bin(db.Model):
         nullable=False
     )
 
+    status = db.Column(
+        db.Text,
+        index=False,
+        unique=False,
+        nullable=True
+    )
+
     lat = db.Column(
         db.Float,
         unique=False,
@@ -146,12 +153,12 @@ class Bin(db.Model):
 class Truck(db.Model):
     __tablename__ = 'Trucks'
     id = db.Column(
-        db.Integer,
+        db.Text,
         primary_key=True
     )
 
     status = db.Column(
-        db.Integer,
+        db.Text,
         index=False,
         unique=False,
         nullable=False

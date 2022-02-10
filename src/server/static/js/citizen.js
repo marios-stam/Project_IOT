@@ -33,6 +33,22 @@ class BinRadiusControl {
 }
 map.addControl(new BinRadiusControl(), "top-left");
 
+class BountiesControl {
+  onAdd(map) {
+    this._map = map;
+    this._container = document.createElement("div");
+    this._container.className = "mapboxgl-ctrl";
+    this._container.innerHTML =
+      '<div class="border rounded border-2 p-2 bg-gradient bg-light d-flex justify-content-center" style="border-color: #d1d1d0; width: 302px;"><button type="button" class="border border-secondary rounded" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Check for bounties near you</button></div>';
+    return this._container;
+  }
+  onRemove() {
+    this._container.parentNode.removeChild(this._container);
+    this._map = undefined;
+  }
+}
+map.addControl(new BountiesControl(), "top-left");
+
 // Geolocation
 const geolocate = new mapboxgl.GeolocateControl({
   positionOptions: {

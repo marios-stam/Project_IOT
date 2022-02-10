@@ -1,5 +1,5 @@
-var userLong = 9.997;
-var userLat = 53.551;
+var userLong = 21.7351380233992;
+var userLat = 38.2462665965041;
 const start = [userLong, userLat];
 // var r = 1;
 
@@ -175,9 +175,10 @@ map.on("load", getRoute);
 // });
 
 async function getRoute() {
-  const query2 = await fetch("/client/driver/routing?truck_id=1");
+  const query2 = await fetch("/trucks/fleet_routing");
   const json2 = await query2.json();
-  const data2 = json2.route_coords;
+  console.log(json2);
+  const data2 = json2[0].route_coords;
   console.log(data2);
   const geojson = {
     type: "Feature",
@@ -208,13 +209,14 @@ async function getRoute() {
       },
     });
   }
-  // const instructions = document.getElementById("instructions");
-  // const steps = data.legs[0].steps;
-  // let tripInstructions = "";
-  // for (const step of steps) {
-  //   tripInstructions += `<li>${step.maneuver.instruction}</li>`;
-  // }
-  // instructions.innerHTML = `<p><strong>Trip duration: ${Math.floor(
-  //   data.duration / 60
-  // )} min </strong></p><ol>${tripInstructions}</ol>`;
+  const instructions = document.getElementById("instructions");
+  const steps = json2[0].steps;
+  console.log(steps);
+  let tripInstructions = "";
+  steps.forEach((element) => {
+    for (const step of element.steps) {
+      tripInstructions += `<li>${step.maneuver.instruction}</li>`;
+    }
+  });
+  instructions.innerHTML = `<ol>${tripInstructions}</ol>`;
 }
