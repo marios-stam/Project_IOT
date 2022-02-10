@@ -127,6 +127,9 @@ class Sensor:
                 if cmd == 'off_fall':
                     self.fallen_status = False
 
+                if cmd == 'charge':
+                    self.battery = 1.0
+
                 pipe.send(self.history[-1:][::-1])
 
 
