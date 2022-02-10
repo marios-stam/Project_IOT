@@ -23,7 +23,7 @@ class BinRadiusControl {
     this._container = document.createElement("div");
     this._container.className = "mapboxgl-ctrl";
     this._container.innerHTML =
-      "<div class='border rounded border-2 p-2 bg-gradient bg-light d-flex justify-content-center' style='border-color: #d1d1d0; width: 302px;'><label>Radius for bins: <select class='bin-radius' name='bin-radius'><option value='1'>1000 m</option><option value='0.5'>500 m</option><option value='0.25'>250 m</option><option value='0.125'>125 m</option></select></label></div>";
+      "<div class='border rounded border-2 p-2 bg-gradient bg-light d-flex justify-content-center' style='border-color: #d1d1d0; width: 302px;'><label>Radius for bins: <select class='bin-radius' name='bin-radius'><option value='5'>5,000 m</option><option value='2.5'>2,500 m</option><option value='1' selected>1,000 m</option><option value='0.5'>500 m</option><option value='0.25'>250 m</option>";
     return this._container;
   }
   onRemove() {

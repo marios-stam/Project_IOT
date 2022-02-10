@@ -24,8 +24,13 @@ def fleet_route_optimising(trucks, bins_to_collect):
 
         route_coords = route_with_wps["routes"][0]["geometry"]["coordinates"]
 
+        steps = route_with_wps["routes"][0]["legs"][0]["steps"]
+
         dictionary = {
-            "truck_id": route["truck_id"], "route_coords": route_coords}
+            "truck_id": route["truck_id"],
+            "route_coords": route_coords,
+            "steps": steps, }
+
         total_result.append(dictionary)
 
     total_result_file_name = r"src/server/trucks/truck_routing/total_result.json"
