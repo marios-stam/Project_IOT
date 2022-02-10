@@ -122,14 +122,40 @@ def get_uncompleted_bounties_in_radius():
         return make_response(f"No bounty found!")
 
     bounties = []
+    refresh = []
+    flag = False
     for i in range(len(result)):
         bounty = result[i].__dict__
         bounty_pos = (bounty['long'], bounty['lat'])
         distance = geopy.distance.distance(pos, bounty_pos).km
 
+        if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], datetime.now()) > BOUNTY_DEADLINE and not bounty['completed']:
+            refresh.append(bounty['id'])
+            flag = True
+
         if distance <= radius:
-            bounty.pop('_sa_instance_state')
-            bounties.append(bounty)
+            bounty_json = {
+                'id': bounty['id'],
+                'timestamp': bounty['timestamp'],
+                'bin_id': bounty['bin_id'],
+                'message': bounty['message'],
+                'points': bounty['points'],
+                'type': bounty['type'],
+                'assigned_usr_id': None if flag else bounty['assigned_usr_id'],
+                'time_assigned': None if flag else bounty['time_assigned'],
+                'completed': False,
+            }
+            bounties.append(bounty_json)
+
+        flag = False
+
+    for id_ in refresh:
+        # print(f"Unissigning user {bounty['assigned_usr_id']} from bounty {bounty['id']}! Time limit exceeded.")
+        update_bounty({
+            'id': id_,
+            'time_assigned': None,
+            'assigned_usr_id': None
+        })
 
     return jsonify(bounties)
 
@@ -184,17 +210,40 @@ def complete_bounty(bounty_id, usr_id):
 
 def get_uncompleted_bounties_of_user(usr_id):
     result = db.session.query(Bounty).filter(
-        Bounty.usr_id == usr_id).filter(Bounty.completed == False).all()
+        Bounty.assigned_usr_id == usr_id).filter(Bounty.completed == False).all()
 
     if(len(result) == 0):
         return make_response(f"No uncompleted bounty found for user with user_id:", usr_id, "!")
 
     bounties = []
+    refresh = []
     for i in range(len(result)):
         bounty = result[i].__dict__
-        bounty.pop('_sa_instance_state')
 
-        bounties.append(bounty)
+        if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], datetime.now()) > BOUNTY_DEADLINE and not bounty['completed']:
+            refresh.append(bounty['id'])
+        else:
+            bounty_json = {
+                'id': bounty['id'],
+                'timestamp': bounty['timestamp'],
+                'bin_id': bounty['bin_id'],
+                'message': bounty['message'],
+                'points': bounty['points'],
+                'type': bounty['type'],
+                'assigned_usr_id': bounty['assigned_usr_id'],
+                'time_assigned': bounty['time_assigned'],
+                'completed': bounty['completed'],
+            }
+
+            bounties.append(bounty_json)
+
+    for id_ in refresh:
+        # print(f"Unissigning user {bounty['assigned_usr_id']} from bounty {bounty['id']}! Time limit exceeded.")
+        update_bounty({
+            'id': id_,
+            'time_assigned': None,
+            'assigned_usr_id': None
+        })
 
     return jsonify(bounties)
 

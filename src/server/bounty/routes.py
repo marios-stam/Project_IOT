@@ -30,9 +30,13 @@ def get_bounty_route(bounty_id):
 def get_all_bounties_route():
     return get_all_bounties()
 
+# get uncompleted bounties of user
+@bounties_blueprint.route('/bounties_of_user/<user_id>', methods=['GET'])
+def get_uncompleted_bounties_of_user_route(user_id):
+    return get_uncompleted_bounties_of_user(user_id)
 
 # get uncompleted bounties within radius
-@bounties_blueprint.route('/bounties/get_uncompleted_bounties_in_radius', methods=['PUT'])
+@bounties_blueprint.route('/bounties/in_radius', methods=['PUT'])
 def get_uncompleted_bounties_in_radius_route():
     return get_uncompleted_bounties_in_radius()
 
