@@ -32,7 +32,7 @@ def register():
     if request.method == 'POST':
         if form.validate_on_submit():
             user = User(username=form.username.data, email=form.email.data, created=datetime.now(),
-                        password=generate_password_hash(form.password.data), role='ctzn', admin=False)
+                        password=generate_password_hash(form.password.data), role='citizen', admin=False)
             db.session.add(user)
             db.session.commit()
             flash([f'Thanks for registering. You are now logged in.'],
