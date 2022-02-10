@@ -41,7 +41,7 @@ def get_uncompleted_bounties_in_radius_route():
 @bounties_blueprint.route('/bounties/complete_bounty', methods=['PUT'])
 def complete_bounty_route():
     data = request.get_json()
-    bounty_id = data['bounty_id']
+    bounty_id = data['id']
     usr_id = data['assigned_usr_id']
 
     return complete_bounty(bounty_id, usr_id)
@@ -51,7 +51,7 @@ def complete_bounty_route():
 @bounties_blueprint.route('/bounties/assign_bounty', methods=['PUT'])
 def assign_bounty_route():
     data = request.get_json()
-    bounty_id = data['bounty_id']
+    bounty_id = data['id']
     usr_id = data['assigned_usr_id']
 
     return assign_bounty(bounty_id, usr_id)

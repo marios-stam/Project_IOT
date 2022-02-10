@@ -50,6 +50,7 @@ class User(db.Model, UserMixin):
         db.Integer,
         index=False,
         unique=False,
+        nullable=False,
         default=0
     )
 
@@ -272,13 +273,15 @@ class Bounty(db.Model):
     message = db.Column(
         db.Text,
         unique=False,
-        nullable=False
+        nullable=False,
+        default="Lorem ipsum dolor sit amet"
     )
 
     points = db.Column(
         db.Integer,
         unique=False,
-        nullable=False
+        nullable=False,
+        default=0
     )
 
     type = db.Column(
@@ -302,7 +305,8 @@ class Bounty(db.Model):
     completed = db.Column(
         db.Integer,
         unique=False,
-        nullable=False
+        nullable=False,
+        default=0
     )
 
     def __repr__(self):
