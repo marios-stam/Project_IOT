@@ -2,3 +2,4 @@
 /src/server/database.sqlite
 __pycache__/
 .idea/
+/src/server/trucks/truck_routing/trav_salesman_problem/api_key.txt

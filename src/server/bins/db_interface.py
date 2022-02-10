@@ -4,6 +4,8 @@ from datetime import datetime as dt
 from flask import request, jsonify
 import geopy.distance
 from datetime import datetime
+from ..bounty.db_interface import create_bounty
+from ..__config__ import *
 
 
 def tested():
@@ -14,7 +16,7 @@ def get_bin(bin_id=None):
     print("Getting Bin")  # get bin
     # bin_id = request.args.get('id', type=str)
 
-    result = db.session.query(Bin).filter(Bin.id == bin_id).all()
+    result = db.session.query(Bin).filter(Bin.sensor_id == bin_id).order_by(Bin.timestamp.desc()).limit(1).all()
     if(len(result) == 0):
         return make_response(f"No bin found with ID: {bin_id}")
     else:
@@ -43,7 +45,7 @@ def update_bin(bin_id=None):
     print("latitude:", latitude)
     print("updated:", updated)
 
-    result = db.session.query(Bin).filter(Bin.id == id).all()
+    result = db.session.query(Bin).filter(Bin.sensor_id == id).all()
     if(len(result) == 0):
         return create_bin(data)
 
@@ -63,6 +65,42 @@ def update_bin(bin_id=None):
 def create_bin(data=None):
     if data == None:
         data = request.get_json()
+
+    if data['fall_status'] or data['fire_status'] or data['fire_status'] < BATTERY_THRESHOLD:
+        prev = get_bin(data['sensor_id']).json
+
+    if data['fall_status'] and not prev['fall_status']:
+        print("Bin fell")
+        create_bounty({
+            'timestamp': data['timestamp'],
+            'bin_id': data['sensor_id'],
+            'message': 'Bin has been tipped over! Please turn it back normally.',
+            'type': 'fall',
+            'points': FALL_POINTS,
+            'completed': False
+        })
+
+    if data['fire_status'] and not prev['fire_status']:
+        print("Bin on fire")
+        create_bounty({
+            'timestamp': data['timestamp'],
+            'bin_id': data['sensor_id'],
+            'message': 'Bin is on fire! Please put it out and call proper authorities.',
+            'type': 'fire',
+            'points': FIRE_POINTS,
+            'completed': False
+        })
+
+    if data['battery'] <= BATTERY_THRESHOLD and prev['battery'] > BATTERY_THRESHOLD:
+        print("Bin low battery")
+        create_bounty({
+            'timestamp': data['timestamp'],
+            'bin_id': data['sensor_id'],
+            'message': 'Sensor battery is low on power! Please charge.',
+            'type': 'battery',
+            'points': CHARGE_POINTS,
+            'completed': False
+        })
 
     # data['updated'] = dt.now()  # set created date
     new_bin = Bin(**data)

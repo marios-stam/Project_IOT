@@ -281,6 +281,12 @@ class Bounty(db.Model):
         nullable=False
     )
 
+    type = db.Column(
+        db.Text,
+        unique=False,
+        nullable=True
+    )
+
     assigned_usr_id = db.Column(
         db.Integer,
         unique=False,
@@ -300,4 +306,4 @@ class Bounty(db.Model):
     )
 
     def __repr__(self):
-        return "Predicted angle:{} from sensor_id:{} ".format(self.angle, self.sensor_id)
+        return "Bounty for bin {}: {}".format(self.sensor_id, self.message)
