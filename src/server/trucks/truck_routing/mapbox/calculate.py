@@ -45,6 +45,7 @@ def generate_problem(start, bins):
 
     url += "?access_token=" + load_key()
     url += "&geometries=geojson"
+    url += "&steps=true"
 
     return url
 
