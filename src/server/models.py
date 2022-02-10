@@ -175,6 +175,7 @@ class Truck(db.Model):
         unique=False,
         nullable=False
     )
+
     updated = db.Column(
         db.DateTime,
         index=False,
@@ -219,3 +220,90 @@ class Report(db.Model):
 
     def __repr__(self):
         return "Report:{} from user_id:{} ".format(self.report_id, self.user_id)
+
+
+class Regression(db.Model):
+    __tablename__ = 'Regression'
+    sensor_id = db.Column(
+        db.Text,
+        primary_key=True,
+        unique=True,
+        nullable=False
+    )
+
+    angle = db.Column(
+        db.Float,
+        unique=False,
+        nullable=False
+    )
+
+    timestamp = db.Column(
+        db.Text,
+        unique=False,
+        nullable=False
+    )
+
+    def __repr__(self):
+        return "Predicted angle:{} from sensor_id:{} ".format(self.angle, self.sensor_id)
+
+
+class Bounty(db.Model):
+    __tablename__ = 'Bounty'
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        unique=True,
+        nullable=False,
+        autoincrement=True
+    )
+
+    timestamp = db.Column(
+        db.DateTime,
+        unique=False,
+        nullable=False
+    )
+
+    bin_id = db.Column(
+        db.Text,
+        unique=False,
+        nullable=True
+    )
+
+    message = db.Column(
+        db.Text,
+        unique=False,
+        nullable=False
+    )
+
+    points = db.Column(
+        db.Integer,
+        unique=False,
+        nullable=False
+    )
+
+    type = db.Column(
+        db.Text,
+        unique=False,
+        nullable=True
+    )
+
+    assigned_usr_id = db.Column(
+        db.Integer,
+        unique=False,
+        nullable=True
+    )
+
+    time_assigned = db.Column(
+        db.DateTime,
+        unique=False,
+        nullable=True
+    )
+
+    completed = db.Column(
+        db.Integer,
+        unique=False,
+        nullable=False
+    )
+
+    def __repr__(self):
+        return "Bounty for bin {}: {}".format(self.sensor_id, self.message)

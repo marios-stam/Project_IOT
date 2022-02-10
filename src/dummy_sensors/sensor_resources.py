@@ -1,11 +1,9 @@
-from flask import Flask
-from flask_restful import Resource, Api, abort
-from sensors import *
+from flask_restful import Resource, abort
+from .__config__ import SERVER_IP
+from .sensor_classes import SensorGateway
 
-
-# =========== FLASK ===========
-app = Flask(__name__)
-api = Api(app)
+# Creating gateway
+gateway = SensorGateway(server=SERVER_IP)
 
 
 # =========== RESOURCE CLASSES ===========
@@ -50,15 +48,11 @@ class Kill(Resource):
     def get(self):
         pass
 
-
-if __name__ == '__main__':
-    # Routing RESTful API endpoints
-    api.add_resource(Sensors, '/sensor/<string:sensor_id>', '/sensor')
-    api.add_resource(Measurements, '/measurement/<string:sensor_id>', '/measurement/<string:sensor_id>/<int:count>')
-    api.add_resource(AllSensors, '/sensor_list')
-
-    # Creating gateway
-    gateway = SensorGateway()
-
-    # Running Flask server
-    app.run(debug=True, port=26223)
+class SensorSendMessage(Resource):
+    def post(self, sensor_id, msg):
+        if sensor_id in gateway.get_sensor_IDs():
+            return gateway.send_msg(sensor_id, msg), 200
+        elif sensor_id is None or msg is None:
+            abort(400, message="No ID or Message provided")
+        else:
+            abort(404, message=f"Sensor with ID {sensor_id} doesn't exist")

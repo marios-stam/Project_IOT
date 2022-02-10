@@ -58,7 +58,7 @@ def get_bins_in_radius_route():
 @bins_blueprint.route('/bins_history')
 def get_bin_history_route():
     # Getting last n bins of a specific bin id
-    id = request.args.get('id', type=int)
+    id = request.args.get('sensor_id', type=str)
     n = request.args.get('n', type=int)
     print("id:", id, "n:", n)
 

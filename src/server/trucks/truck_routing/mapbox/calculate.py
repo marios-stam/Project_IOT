@@ -3,7 +3,7 @@ import json
 
 
 def load_key():  # load key from .txt file
-    with open(r"src\server\truck_routing\mapbox\api_key.txt", "r") as key_file:
+    with open(r"src\server\trucks\truck_routing\mapbox\api_key.txt", "r") as key_file:
         key = key_file.read()
     return key
 
@@ -21,7 +21,7 @@ def get_solution(url):
     # print("Response:", r)
 
     # save to json file
-    result_file_name = r"src\server\truck_routing\mapbox\result.json"
+    result_file_name = r"src\server\trucks\truck_routing\mapbox\result.json"
     with open(result_file_name, 'w') as outfile:
         outfile.write(json.dumps(r.json()))
 

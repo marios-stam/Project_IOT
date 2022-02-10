@@ -6,7 +6,8 @@ from flask_login import LoginManager
 # Globally accessible libraries
 db = SQLAlchemy()
 
-from .tasks import scheduler # This line must be run after the initialization of db
+from .tasks import scheduler    # This line must be run after the initialization of db
+
 
 def init_app(config_class=Config):
     """Initialize the core application."""
@@ -32,6 +33,8 @@ def init_app(config_class=Config):
         from .profile import routes
         from . import views  # Temp ('index')
         from .reports import routes
+        from .regression import routes
+        from .bounty import routes
 
         # Register Blueprints
         app.register_blueprint(bins.routes.bins_blueprint)
@@ -43,6 +46,8 @@ def init_app(config_class=Config):
         app.register_blueprint(profile.routes.profile_blueprint)
         app.register_blueprint(views.bp)  # Temp
         app.register_blueprint(reports.routes.reports_blueprint)
+        app.register_blueprint(regression.routes.regression_blueprint)
+        app.register_blueprint(bounty.routes.bounties_blueprint)
 
         # Create sql tables from data models
         print("Creating SQL Tables")

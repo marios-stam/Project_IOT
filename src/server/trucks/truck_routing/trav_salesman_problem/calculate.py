@@ -1,4 +1,6 @@
-# https://graphhopper.com/api/1/vrp?key=<your_key>
+import requests
+import os
+
 try:
     from classes import *
     from waypoints import extract_waypoints_from_result
@@ -6,14 +8,17 @@ except:
     from .classes import *
     from .waypoints import extract_waypoints_from_result
 
-import requests
-import os
 
 # print("Current working directory:", os.getcwd())
-problem_file_name = r"src\server\truck_routing\trav_salesman_problem\problem.json"
-result_file_name = r"src\server\truck_routing\trav_salesman_problem\result.json"
-final_result_file_name = r"src\server\truck_routing\trav_salesman_problem\final_result.json"
-api_key_file_name = r"src\server\truck_routing\trav_salesman_problem\api_key.txt"
+# problem_file_name = r"src\server\trucks\truck_routing\trav_salesman_problem\problem.json"
+# result_file_name = r"src\server\trucks\truck_routing\trav_salesman_problem\result.json"
+# final_result_file_name = r"src\server\trucks\truck_routing\trav_salesman_problem\final_result.json"
+# api_key_file_name = r"src\server\trucks\truck_routing\trav_salesman_problem\api_key.txt"
+
+problem_file_name = os.path.join(os.getcwd(), "server/trucks/truck_routing/trav_salesman_problem/problem.json")
+result_file_name = os.path.join(os.getcwd(), "server/trucks/truck_routing/trav_salesman_problem/result.json")
+final_result_file_name = os.path.join(os.getcwd(), "server/trucks/truck_routing/trav_salesman_problem/final_result.json")
+api_key_file_name = os.path.join(os.getcwd(), "server/trucks/truck_routing/trav_salesman_problem/api_key.txt")
 
 
 def load_key():  # load key from .txt file
