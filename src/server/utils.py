@@ -7,9 +7,21 @@ from random import randint
 
 def diff_time(t1, t2) -> int:
     if type(t1) is str:
-        t1 = datetime.strptime(t1, '%d/%m/%Y %H:%M:%S')
+        try:
+            t1 = datetime.strptime(t1, '%d/%m/%Y %H:%M:%S')
+        except ValueError:
+            try:
+                t1 = datetime.strptime(t1[:-4], '%d-%m-%Y %H:%M:%S')
+            except ValueError:
+                t1 = datetime.strptime(t1[:-4], '%a, %d %b %Y %H:%M:%S')
     if type(t1) is str:
-        t2 = datetime.strptime(t2, '%d/%m/%Y %H:%M:%S')
+        try:
+            t2 = datetime.strptime(t2, '%d/%m/%Y %H:%M:%S')
+        except ValueError:
+            try:
+                t2 = datetime.strptime(t2[:-4], '%d-%m-%Y %H:%M:%S')
+            except ValueError:
+                t2 = datetime.strptime(t2[:-4], '%a, %d %b %Y %H:%M:%S')
 
     res = t2 - t1
     if res.days < 0:

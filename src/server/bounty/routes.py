@@ -30,9 +30,13 @@ def get_bounty_route(bounty_id):
 def get_all_bounties_route():
     return get_all_bounties()
 
+# get uncompleted bounties of user
+@bounties_blueprint.route('/bounties_of_user/<user_id>', methods=['GET'])
+def get_uncompleted_bounties_of_user_route(user_id):
+    return get_uncompleted_bounties_of_user(user_id)
 
 # get uncompleted bounties within radius
-@bounties_blueprint.route('/bounties/get_uncompleted_bounties_in_radius', methods=['PUT'])
+@bounties_blueprint.route('/bounties/in_radius', methods=['PUT'])
 def get_uncompleted_bounties_in_radius_route():
     return get_uncompleted_bounties_in_radius()
 
@@ -41,7 +45,7 @@ def get_uncompleted_bounties_in_radius_route():
 @bounties_blueprint.route('/bounties/complete_bounty', methods=['PUT'])
 def complete_bounty_route():
     data = request.get_json()
-    bounty_id = data['bounty_id']
+    bounty_id = data['id']
     usr_id = data['assigned_usr_id']
 
     return complete_bounty(bounty_id, usr_id)
@@ -51,7 +55,7 @@ def complete_bounty_route():
 @bounties_blueprint.route('/bounties/assign_bounty', methods=['PUT'])
 def assign_bounty_route():
     data = request.get_json()
-    bounty_id = data['bounty_id']
+    bounty_id = data['id']
     usr_id = data['assigned_usr_id']
 
     return assign_bounty(bounty_id, usr_id)

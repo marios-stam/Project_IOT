@@ -110,23 +110,12 @@ $ curl http://localhost:5000/measurement/0c8e145e-4cec-479e-8c3a-2129285e6db7/2
 ]
 ```
 
-## Miscellaneous Utilities
-
-src.utils.utils is a package containing various functions used over the project
-
-### `rand_perc(inc: bool = False, neg: bool = False, center: bool = False) -> float`
-
-Returns a random percentage in range [0, 1]
-
-#### Flags
-- inc: changes the range to [1, 2]
-- neg: changes the range to [-1, 0]
-- center: changes the range to [-1, 1]
-
-### `is_perc(perc: float) -> bool)`
-
-Returns `True` if `perc` is a percentage (between 0 and 1)
-
-### `rand_check(chance: float) -> bool`
-
-Makes a random check that has `chance` chances to succeed. Returns `True` on success and `False` in failure.
+### /send_msg/<sensor_id>/<message>
+**POST** to sent a message or command to a sensor. Implemented commands are the following:
+- charge: set `battery = 1.0`
+- toggle_fire: set `fire_status = not fire_status`
+- toggle_fall: set `fall_status = not fall_status`
+- on_fire: set `fire_status = True`
+- on_fall: set `fall_status = True`
+- off_fire: set `fire_status = False`
+- off_fall: set `fall_status = False`

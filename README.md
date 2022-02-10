@@ -1,6 +1,13 @@
 # Project_IOT
 
+## Usage
 
-Install dependencies : 
+### Install dependencies : 
+`pip install -r /path/to/requirements.txt`
 
-`pip install flask_login flask_wtf`
+### Run
+Start server (default is localhost on port 5000)
+`python wsgi.py`
+
+Start dummy sensors service (default is localhost on port 26223)
+`python dummy_sensors.py`
