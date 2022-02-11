@@ -310,11 +310,11 @@ class Bounty(db.Model):
     )
 
     completed = db.Column(
-        db.Integer,
+        db.Boolean,
         unique=False,
         nullable=False,
-        default=0
+        default=False
     )
 
     def __repr__(self):
-        return "Bounty for bin {}: {}".format(self.sensor_id, self.message)
+        return "Bounty for bin {}: {}".format(self.bin_id, self.message)

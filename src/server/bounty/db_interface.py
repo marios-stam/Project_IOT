@@ -1,5 +1,5 @@
 from flask import request, make_response
-from ..models import db, Bounty, User
+from ..models import Bin, db, Bounty, User
 from flask import jsonify
 from datetime import datetime as dt
 from ..utils import diff_time
@@ -126,7 +126,8 @@ def get_uncompleted_bounties_in_radius():
     flag = False
     for i in range(len(result)):
         bounty = result[i].__dict__
-        bounty_pos = (bounty['long'], bounty['lat'])
+        bin = db.session.query(Bin).get(bounty['bin_id'])
+        bounty_pos = (bin.long, bin.lat)
         distance = geopy.distance.distance(pos, bounty_pos).km
 
         if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], datetime.now()) > BOUNTY_DEADLINE and not bounty['completed']:

@@ -1,4 +1,4 @@
-var userLong, userLat;
+var userLong, userLat, start;
 var r = 1;
 
 // Get and set the map's access token
@@ -63,18 +63,23 @@ map.on("load", () => {
 geolocate.once("geolocate", (data) => {
   userLong = data.coords.longitude;
   userLat = data.coords.latitude;
+  start = [userLong, userLat];
   drawBins();
+  getBounties();
 });
 geolocate.on("geolocate", (data) => {
   userLong = data.coords.longitude;
   userLat = data.coords.latitude;
+  start = [userLong, userLat];
 });
 geolocate.on("error", () => {
   console.log("An error event has occurred.");
   userLong = 21.73513802339923;
   userLat = 38.24626659650408;
+  start = [userLong, userLat];
   new mapboxgl.Marker().setLngLat([userLong, userLat]).addTo(map);
   drawBins();
+  getBounties();
 });
 // geolocate.on("trackuserlocationstart", () => {
 //   console.log("A trackuserlocationstart event has occurred.");
@@ -127,7 +132,7 @@ async function drawBins() {
   const updateSource = setInterval(async () => {
     const geojson = await getBins(updateSource);
     map.getSource("bins").setData(geojson);
-  }, 10000);
+  }, 1000);
 
   async function getBins(updateSource) {
     try {
@@ -169,7 +174,6 @@ async function drawBins() {
   }
 }
 
-// const start = [23.8373965, 38.0158537];
 map.on("mouseenter", "bins", () => {
   map.getCanvas().style.cursor = "pointer";
 });
@@ -232,12 +236,7 @@ map.on("click", "bins", (e) => {
   getRoute(coordinates); //*/
 });
 
-function chargeSensor(entry_id) {
-  fetch(`/client/citizen/charge?bin_id=${entry_id}`);
-}
-
-/*/
-async function getRoute(end) {
+/*async function getRoute(end) {
   const query = await fetch(
     `https://api.mapbox.com/directions/v5/mapbox/walking/${start[0]},${start[1]};${end[0]},${end[1]}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
   );
@@ -273,16 +272,13 @@ async function getRoute(end) {
       },
     });
   }
-  //
   const instructions = document.getElementById("instructions");
   const steps = data.legs[0].steps;
   let tripInstructions = "";
   for (const step of steps) {
     tripInstructions += `<li>${step.maneuver.instruction}</li>`;
   }
-  instructions.innerHTML = `<p><strong>Trip duration: ${Math.floor(
-    data.duration / 60
-  )} min </strong></p><ol>${tripInstructions}</ol>`; ///
+  instructions.innerHTML = `<ol>${tripInstructions}</ol>`;
 } //*/
 
 /*/
@@ -292,3 +288,77 @@ const directions = new MapboxDirections({
   profile: "mapbox/driving",
 });
 map.addControl(directions, "top-left"); //*/
+
+function chargeSensor(entry_id) {
+  fetch(`/client/citizen/charge?bin_id=${entry_id}`);
+}
+
+async function getBounties() {
+  try {
+    const sdata = { long: userLong, lat: userLat, radius: r };
+    const response = await fetch("/bounties/in_radius", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(sdata),
+    });
+    const rdata = await response.json();
+    offcanvasBody = document.querySelector(".offcanvas-body");
+    offcanvasBody.innerHTML = "";
+    rdata.forEach((element, index, array) => {
+      if (
+        element.assigned_usr_id ==
+        document.querySelector('meta[name="user_id"]').content
+      ) {
+        let now = Date.now();
+        console.log(now);
+        console.log(element.time_assigned);
+        let ass = Date.parse(element.time_assigned + " GMT+2");
+        console.log(ass);
+        let left = new Date(ass + 3600000 - now);
+        let timeLeft =
+          ("0" + left.getUTCHours()).slice(-2) +
+          ":" +
+          ("0" + left.getUTCMinutes()).slice(-2) +
+          ":" +
+          ("0" + left.getUTCSeconds()).slice(-2);
+        offcanvasBody.innerHTML += `<p class="bg-success"><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button>Get Directions</button> <em>Reward: ${element.points} pts</em></p><p>Time left: ${timeLeft}</p><hr>`;
+        array.splice(index, 1);
+      }
+    });
+    rdata.forEach((element) => {
+      if (element.assigned_usr_id == null) {
+        offcanvasBody.innerHTML += `<p><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button onclick=assumeBounty(${element.id})>Take over the handling</button> <em>Reward: ${element.points} pts</em></p><hr>`;
+      }
+    });
+  } catch (error) {
+    console.log("Error: ", error);
+  }
+}
+setInterval(getBounties, 1000);
+
+async function assumeBounty(bountyId) {
+  try {
+    const sdata = {
+      id: bountyId,
+      assigned_usr_id: document.querySelector('meta[name="user_id"]').content,
+    };
+    const response = await fetch("/bounties/assign_bounty", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(sdata),
+    });
+    // console.log(response)
+    // offcanvasBody = document.querySelector(".offcanvas-body");
+    // offcanvasBody.innerHTML = "";
+    // rdata.forEach((element) => {
+    //   offcanvasBody.innerHTML += `<p><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button>Take over the handling</button> <em>Reward: ${element.points} pts</em></p><hr>`;
+    // });
+    // console.log(rdata);
+  } catch (error) {
+    console.log("Error: ", error);
+  }
+}
