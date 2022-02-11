@@ -6,7 +6,6 @@ from ..utils import diff_time
 from ..__config__ import BOUNTY_DEADLINE
 import geopy.distance
 from datetime import datetime
-from copy import deepcopy
 
 
 def get_bounty(bounty_id=None):
@@ -114,39 +113,41 @@ def get_uncompleted_bounties_in_radius():
     # get data from json
     data = request.get_json()
     pos = (data['long'], data['lat'])
-    radius = data['radius']
+    radius = float(data['radius'])
 
     result = db.session.query(Bounty).filter(Bounty.completed == False).all()
 
     if(len(result) == 0):
         return make_response(f"No bounty found!")
+    else:
+        result = [{
+                'id': bounty.__dict__['id'],
+                'long': bounty.__dict__['long'],
+                'lat': bounty.__dict__['lat'],
+                'timestamp': bounty.__dict__['timestamp'],
+                'bin_id': bounty.__dict__['bin_id'],
+                'message': bounty.__dict__['message'],
+                'points': bounty.__dict__['points'],
+                'type': bounty.__dict__['type'],
+                'assigned_usr_id': bounty.__dict__['assigned_usr_id'],
+                'time_assigned': bounty.__dict__['time_assigned'],
+                'completed': False
+            } for bounty in result]
 
     bounties = []
     refresh = []
     flag = False
-    for i in range(len(result)):
-        bounty = result[i].__dict__
-        bin = db.session.query(Bin).get(bounty['bin_id'])
-        bounty_pos = (bin.long, bin.lat)
-        distance = geopy.distance.distance(pos, bounty_pos).km
+    for bounty in result:
+        distance = geopy.distance.distance(pos, (bounty['long'], bounty['lat'])).km
 
         if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], datetime.now()) > BOUNTY_DEADLINE and not bounty['completed']:
             refresh.append(bounty['id'])
             flag = True
 
         if distance <= radius:
-            bounty_json = {
-                'id': bounty['id'],
-                'timestamp': bounty['timestamp'],
-                'bin_id': bounty['bin_id'],
-                'message': bounty['message'],
-                'points': bounty['points'],
-                'type': bounty['type'],
-                'assigned_usr_id': None if flag else bounty['assigned_usr_id'],
-                'time_assigned': None if flag else bounty['time_assigned'],
-                'completed': False,
-            }
-            bounties.append(bounty_json)
+            bounty['assigned_usr_id'] = None if flag else bounty['assigned_usr_id']
+            bounty['time_assigned'] = None if flag else bounty['time_assigned']
+            bounties.append(bounty)
 
         flag = False
 
@@ -157,6 +158,8 @@ def get_uncompleted_bounties_in_radius():
             'time_assigned': None,
             'assigned_usr_id': None
         })
+
+    print(bounties)
 
     return jsonify(bounties)
 

@@ -265,6 +265,18 @@ class Bounty(db.Model):
         autoincrement=True
     )
 
+    long = db.Column(
+        db.Float,
+        unique=False,
+        nullable=False
+    )
+
+    lat = db.Column(
+        db.Float,
+        unique=False,
+        nullable=False
+    )
+
     timestamp = db.Column(
         db.DateTime,
         unique=False,

@@ -9,3 +9,6 @@ FIRE_POINTS = 500
 CHARGE_POINTS = 25
 BATTERY_THRESHOLD = 0.25            # 25%
 BOUNTY_DEADLINE = 60 * 60           # 1 hour
+
+# ==== BINS ====
+FILL_CRITICAL = 0.8

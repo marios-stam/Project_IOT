@@ -69,10 +69,15 @@ def create_bin(data=None):
     if data['fall_status'] or data['fire_status'] or data['fire_status'] < BATTERY_THRESHOLD:
         prev = get_bin(data['sensor_id']).json
 
+    if data['fill_level'] > FILL_CRITICAL:
+        data['status'] = 'need_truck'
+
     if data['fall_status'] and not prev['fall_status']:
         print("Bin fell")
         create_bounty({
             'timestamp': data['timestamp'],
+            'long': data['long'],
+            'lat': data['lat'],
             'bin_id': data['sensor_id'],
             'message': 'Bin has been tipped over! Please turn it back normally.',
             'type': 'fall',
@@ -84,6 +89,8 @@ def create_bin(data=None):
         print("Bin on fire")
         create_bounty({
             'timestamp': data['timestamp'],
+            'long': data['long'],
+            'lat': data['lat'],
             'bin_id': data['sensor_id'],
             'message': 'Bin is on fire! Please put it out and call proper authorities.',
             'type': 'fire',
@@ -95,6 +102,8 @@ def create_bin(data=None):
         print("Bin low battery")
         create_bounty({
             'timestamp': data['timestamp'],
+            'long': data['long'],
+            'lat': data['lat'],
             'bin_id': data['sensor_id'],
             'message': 'Sensor battery is low on power! Please charge.',
             'type': 'battery',
