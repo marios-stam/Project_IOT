@@ -40,6 +40,7 @@ def generate_problem(start, bins):
     url += str(start[0]) + "," + str(start[1]) + ";"
     for bin in bins:
         url += str(bin[0]) + "," + str(bin[1]) + ";"
+    url += str(start[0]) + "," + str(start[1]) + ";"
 
     # remove last ;
     url = url[:-1]

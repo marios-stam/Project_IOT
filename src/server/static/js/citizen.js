@@ -13,6 +13,14 @@ const map = new mapboxgl.Map({
   zoom: 17,
 });
 
+var directions = new MapboxDirections({
+  accessToken: mapboxgl.accessToken,
+  unit: "metric",
+  profile: "mapbox/walking",
+  interactive: false,
+});
+map.addControl(directions);
+
 // Add zoom and rotation controls to the map
 map.addControl(new mapboxgl.NavigationControl());
 
@@ -89,11 +97,35 @@ geolocate.on("error", () => {
 // });
 
 async function drawBins() {
-  const geojson = await getBins();
+  const arrays = await getBins();
+
+  console.log(arrays[0], arrays[1]);
+
+  if (arrays[1].features.length != 0) {
+    map.addSource("problems", {
+      type: "geojson",
+      data: arrays[1],
+    });
+
+    map.addLayer({
+      id: "problems",
+      type: "circle",
+      source: "problems",
+      paint: {
+        "circle-radius": {
+          stops: [
+            [12, 3],
+            [20, 30],
+          ],
+        },
+        "circle-color": "#FF00FF",
+      },
+    });
+  }
 
   map.addSource("bins", {
     type: "geojson",
-    data: geojson,
+    data: arrays[0],
   });
 
   map.addLayer({
@@ -132,7 +164,7 @@ async function drawBins() {
   const updateSource = setInterval(async () => {
     const geojson = await getBins(updateSource);
     map.getSource("bins").setData(geojson);
-  }, 1000);
+  }, 1000000);
 
   async function getBins(updateSource) {
     try {
@@ -144,6 +176,10 @@ async function drawBins() {
         type: "FeatureCollection",
         features: [],
       };
+      let problems = {
+        type: "FeatureCollection",
+        features: [],
+      };
       data.forEach((element) => {
         if (element.fill_level <= 60) {
           binColor = "green";
@@ -151,6 +187,32 @@ async function drawBins() {
           binColor = "orange";
         } else {
           binColor = "red";
+        }
+        needCharge = false;
+        console.log(element.fire_status);
+        console.log(element.fall_status);
+        if (
+          element.battery <= 0.25 ||
+          element.fire_status ||
+          element.fall_status
+        ) {
+          needCharge = true;
+          problems.features.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [element.long, element.lat],
+            },
+            properties: {
+              color: binColor,
+              sensor_id: element.sensor_id,
+              fill_level: element.fill_level,
+              battery: element.battery,
+              fall_status: element.fall_status,
+              fire_status: element.fire_status,
+              needCharge: needCharge,
+            },
+          });
         }
         geojson.features.push({
           type: "Feature",
@@ -163,10 +225,13 @@ async function drawBins() {
             sensor_id: element.sensor_id,
             fill_level: element.fill_level,
             battery: element.battery,
+            fall_status: element.fall_status,
+            fire_status: element.fire_status,
+            needCharge: needCharge,
           },
         });
       });
-      return geojson;
+      return [geojson, problems];
     } catch (err) {
       if (updateSource) clearInterval(updateSource);
       throw new Error(err);
@@ -187,117 +252,40 @@ map.on("click", "bins", (e) => {
   const sensor_id = e.features[0].properties.sensor_id;
   const fill_level = e.features[0].properties.fill_level * 100;
   const battery = e.features[0].properties.battery * 100;
+  const fall_status = e.features[0].properties.fall_status;
+  const fire_status = e.features[0].properties.fire_status;
   while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
     coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
   }
-  const popupHTML = `<strong>Bin ID: ${sensor_id}</strong><br>Latitude: ${latitude}<br>Longitude: ${longitude}<br>Fill Level: ${fill_level.toFixed(1)}%<br>Battery: ${battery.toFixed(1)}%<br><a href="#">Report Problem</a><br><a href="/">Get Directions</a><hr><button class="btn btn-outline-success btn-sm" onclick="chargeSensor(${sensor_id})">Charge Sensor</button>`;
+  let popupHTML = `<strong>Bin ID: ${sensor_id}</strong><br>Latitude: ${latitude}<br>Longitude: ${longitude}<br>Fill Level: ${fill_level.toFixed(
+    1
+  )}%<br>Battery: ${battery.toFixed(1)}%<br><hr>`;
+  console.log(battery, fire_status, fall_status);
+  let errors = false;
+  if (battery <= 25) {
+    popupHTML += `🔋 This bin is low on battery! <br>`;
+    errors = true;
+  }
+  if (fire_status) {
+    popupHTML += `🔥 This bin is on fire! Call 911!<br>`;
+    errors = true;
+  }
+  if (fall_status) {
+    popupHTML += `🚯 This bin is tipped over!<br>`;
+    errors = true;
+  }
+  if (errors) {
+    popupHTML += `<hr>`;
+  }
+  popupHTML += `<div class="row d-flex justify-content-evenly"><button class="col-5 btn btn-primary btn-sm" onclick="getDirections('${e.features[0].properties.sensor_id}')">Get Directions</button><button class="col-5 btn btn-danger btn-sm">Report Problem</button></div>`;
   new mapboxgl.Popup().setLngLat(coordinates).setHTML(popupHTML).addTo(map);
-  /*/ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  const end = {
-    type: "FeatureCollection",
-    features: [
-      {
-        type: "Feature",
-        properties: {},
-        geometry: {
-          type: "Point",
-          coordinates: coordinates,
-        },
-      },
-    ],
-  };
-  if (map.getLayer("end")) {
-    map.getSource("end").setData(end);
-  } else {
-    map.addLayer({
-      id: "end",
-      type: "circle",
-      source: {
-        type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: [
-            {
-              type: "Feature",
-              properties: {},
-              geometry: {
-                type: "Point",
-                coordinates: coordinates,
-              },
-            },
-          ],
-        },
-      },
-      paint: {
-        "circle-radius": 1,
-      },
-    });
-  }
-  getRoute(coordinates); //*/
 });
-
-/*async function getRoute(end) {
-  const query = await fetch(
-    `https://api.mapbox.com/directions/v5/mapbox/walking/${start[0]},${start[1]};${end[0]},${end[1]}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
-  );
-  const json = await query.json();
-  const data = json.routes[0];
-  const route = data.geometry.coordinates;
-  const geojson = {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      type: "LineString",
-      coordinates: route,
-    },
-  };
-  if (map.getSource("route")) {
-    map.getSource("route").setData(geojson);
-  } else {
-    map.addLayer({
-      id: "route",
-      type: "line",
-      source: {
-        type: "geojson",
-        data: geojson,
-      },
-      layout: {
-        "line-join": "round",
-        "line-cap": "round",
-      },
-      paint: {
-        "line-color": "#3887be",
-        "line-width": 5,
-        "line-opacity": 0.75,
-      },
-    });
-  }
-  const instructions = document.getElementById("instructions");
-  const steps = data.legs[0].steps;
-  let tripInstructions = "";
-  for (const step of steps) {
-    tripInstructions += `<li>${step.maneuver.instruction}</li>`;
-  }
-  instructions.innerHTML = `<ol>${tripInstructions}</ol>`;
-} //*/
-
-/*/
-const directions = new MapboxDirections({
-  accessToken: mapboxgl.accessToken,
-  unit: "metric",
-  profile: "mapbox/driving",
-});
-map.addControl(directions, "top-left"); //*/
-
-function chargeSensor(sensor_id) {
-  fetch(`/client/citizen/charge?bin_id=${sensor_id}`);
-}
 
 async function getBounties() {
   try {
     // const sdata = { long: userLong, lat: userLat, radius: r };
     // const response = await fetch("/bounties/in_radius", {
-    let sdata = { "long": userLong, "lat": userLat, "radius": r };
+    let sdata = { long: userLong, lat: userLat, radius: r };
     let response = await fetch("/bounties/in_radius", {
       method: "PUT",
       headers: {
@@ -325,7 +313,7 @@ async function getBounties() {
           ("0" + left.getUTCMinutes()).slice(-2) +
           ":" +
           ("0" + left.getUTCSeconds()).slice(-2);
-        mybounties += `<p class="bg-success"><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button>Get Directions</button> <em>Reward: ${element.points} pts</em></p><p>Time left: ${timeLeft}</p><hr>`;
+        mybounties += `<p class="bg-success"><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button onclick="getDirections('${element.bin_id}')">Get Directions</button> <em>Reward: ${element.points} pts</em></p><p>Time left: ${timeLeft}</p><hr>`;
       }
       if (element.assigned_usr_id == null) {
         otherbounties += `<p><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button onclick=assumeBounty(${element.id})>Take over the handling</button> <em>Reward: ${element.points} pts</em></p><hr>`;
@@ -336,7 +324,25 @@ async function getBounties() {
     console.log("Error: ", error);
   }
 }
-setInterval(getBounties, 1000);
+setInterval(getBounties, 2000);
+
+async function getDirections(binId) {
+  directions.removeRoutes();
+  console.log(binId);
+  const response = await fetch(fetchUrl);
+  const data = await response.json();
+  console.log(data);
+  let binLong, binLat;
+  data.forEach((element) => {
+    if (element.sensor_id == binId) {
+      binLong = element.long;
+      binLat = element.lat;
+    }
+  });
+  console.log(binLong, binLat);
+  directions.setOrigin(start);
+  directions.setDestination([binLong, binLat]);
+}
 
 async function assumeBounty(bountyId) {
   try {
