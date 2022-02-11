@@ -123,7 +123,7 @@ def create_bin(data=None):
 def get_all_bins():
     print("Getting all Bins")  # get bin
 
-    result = db.session.query(Bin).all()
+    result = db.session.query(Bin).order_by(Bin.timestamp.desc()).all()
     if(len(result) == 0):
         return make_response(f"No bin found!")
 
@@ -163,7 +163,7 @@ def get_bins_in_radius(pos, radius):
     # pos--> (long, lat)
     # radius--> in km
 
-    result = db.session.query(Bin).all()
+    result = db.session.query(Bin).order_by(Bin.timestamp.desc()).all()
     if(len(result) == 0):
         return make_response(f"No bin found!")
 

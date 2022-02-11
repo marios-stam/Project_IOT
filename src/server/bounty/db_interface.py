@@ -1,4 +1,3 @@
-from copy import deepcopy
 from flask import request, make_response
 from ..models import Bin, db, Bounty, User
 from flask import jsonify
@@ -7,6 +6,8 @@ from ..utils import diff_time
 from ..__config__ import BOUNTY_DEADLINE
 import geopy.distance
 from datetime import datetime
+from copy import deepcopy
+import requests
 
 
 def get_bounty(bounty_id=None):
@@ -66,7 +67,6 @@ def get_all_bounties():
     print("Getting all Bounties")
 
     result = db.session.query(Bounty).all()
-    print(len(result))
     if(len(result) == 0):
         return make_response(f"No bounty found!")
 
@@ -160,8 +160,6 @@ def get_uncompleted_bounties_in_radius():
             'assigned_usr_id': None
         })
 
-    print(bounties)
-
     return jsonify(bounties)
 
 
@@ -186,6 +184,8 @@ def complete_bounty(bounty_id, usr_id):
     # Checks for Bounty row
     bounty = get_bounty(bounty_id).json
     points = deepcopy(bounty['points'])
+    type = deepcopy(bounty['type'])
+    sensor_id = deepcopy(bounty['sensor_id'])
     if len(bounty) == 0:
         return make_response(f"Bounty with id {bounty_id} not found!", 404)
     if bounty['assigned_usr_id'] != usr_id:
@@ -199,7 +199,16 @@ def complete_bounty(bounty_id, usr_id):
         return make_response(f"User with id {usr_id} not found!", 404)
     elif len(usr) > 1:
         return make_response(f"Multiple users with id {usr_id} were found!", 500)
-        
+    
+    if type == 'fire':
+        requests.post("http://localhost:26223/send_msg/" + sensor_id + '/off_fire')
+    elif type == 'fall':
+        requests.post("http://localhost:26223/send_msg/" + sensor_id + '/off_fall')
+    elif type == 'battery':
+        requests.post("http://localhost:26223/send_msg/" + sensor_id + '/charge')
+    else:
+        return make_response("Unknown bounty type", 403)
+
     # Update bounty
     update_bounty({
         'id': bounty_id,
