@@ -160,7 +160,7 @@ async function drawBins() {
           },
           properties: {
             color: binColor,
-            entry_id: element.entry_id,
+            sensor_id: element.sensor_id,
             fill_level: element.fill_level,
             battery: element.battery,
           },
@@ -184,13 +184,13 @@ map.on("click", "bins", (e) => {
   const coordinates = e.features[0].geometry.coordinates.slice();
   const latitude = coordinates[1].toFixed(6);
   const longitude = coordinates[0].toFixed(6);
-  const entry_id = e.features[0].properties.entry_id;
-  const fill_level = e.features[0].properties.fill_level;
-  const battery = e.features[0].properties.battery;
+  const sensor_id = e.features[0].properties.sensor_id;
+  const fill_level = e.features[0].properties.fill_level * 100;
+  const battery = e.features[0].properties.battery * 100;
   while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
     coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
   }
-  const popupHTML = `<strong>Bin ID: ${entry_id}</strong><br>Latitude: ${latitude}<br>Longitude: ${longitude}<br>Fill Level: ${fill_level}%<br>Battery: ${battery}%<br><a href="#">Report Problem</a><br><a href="/">Get Directions</a><hr><button class="btn btn-outline-success btn-sm" onclick="chargeSensor(${entry_id})">Charge Sensor</button>`;
+  const popupHTML = `<strong>Bin ID: ${sensor_id}</strong><br>Latitude: ${latitude}<br>Longitude: ${longitude}<br>Fill Level: ${fill_level.toFixed(1)}%<br>Battery: ${battery.toFixed(1)}%<br><a href="#">Report Problem</a><br><a href="/">Get Directions</a><hr><button class="btn btn-outline-success btn-sm" onclick="chargeSensor(${sensor_id})">Charge Sensor</button>`;
   new mapboxgl.Popup().setLngLat(coordinates).setHTML(popupHTML).addTo(map);
   /*/ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   const end = {
@@ -289,33 +289,35 @@ const directions = new MapboxDirections({
 });
 map.addControl(directions, "top-left"); //*/
 
-function chargeSensor(entry_id) {
-  fetch(`/client/citizen/charge?bin_id=${entry_id}`);
+function chargeSensor(sensor_id) {
+  fetch(`/client/citizen/charge?bin_id=${sensor_id}`);
 }
 
 async function getBounties() {
   try {
-    const sdata = { long: userLong, lat: userLat, radius: r };
-    const response = await fetch("/bounties/in_radius", {
+    // const sdata = { long: userLong, lat: userLat, radius: r };
+    // const response = await fetch("/bounties/in_radius", {
+    let sdata = { "long": userLong, "lat": userLat, "radius": r };
+    let response = await fetch("/bounties/in_radius", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(sdata),
     });
-    const rdata = await response.json();
+    // const rdata = await response.json();
+    let rdata = await response.json();
     offcanvasBody = document.querySelector(".offcanvas-body");
     offcanvasBody.innerHTML = "";
+    let mybounties = "";
+    let otherbounties = "";
     rdata.forEach((element, index, array) => {
       if (
         element.assigned_usr_id ==
         document.querySelector('meta[name="user_id"]').content
       ) {
         let now = Date.now();
-        console.log(now);
-        console.log(element.time_assigned);
         let ass = Date.parse(element.time_assigned + " GMT+2");
-        console.log(ass);
         let left = new Date(ass + 3600000 - now);
         let timeLeft =
           ("0" + left.getUTCHours()).slice(-2) +
@@ -323,15 +325,13 @@ async function getBounties() {
           ("0" + left.getUTCMinutes()).slice(-2) +
           ":" +
           ("0" + left.getUTCSeconds()).slice(-2);
-        offcanvasBody.innerHTML += `<p class="bg-success"><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button>Get Directions</button> <em>Reward: ${element.points} pts</em></p><p>Time left: ${timeLeft}</p><hr>`;
-        array.splice(index, 1);
+        mybounties += `<p class="bg-success"><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button>Get Directions</button> <em>Reward: ${element.points} pts</em></p><p>Time left: ${timeLeft}</p><hr>`;
       }
-    });
-    rdata.forEach((element) => {
       if (element.assigned_usr_id == null) {
-        offcanvasBody.innerHTML += `<p><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button onclick=assumeBounty(${element.id})>Take over the handling</button> <em>Reward: ${element.points} pts</em></p><hr>`;
+        otherbounties += `<p><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button onclick=assumeBounty(${element.id})>Take over the handling</button> <em>Reward: ${element.points} pts</em></p><hr>`;
       }
     });
+    offcanvasBody.innerHTML = mybounties + otherbounties;
   } catch (error) {
     console.log("Error: ", error);
   }

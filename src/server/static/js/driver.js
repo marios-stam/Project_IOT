@@ -15,11 +15,27 @@ const map = new mapboxgl.Map({
 
 // var directions = new MapboxDirections({
 //   accessToken: mapboxgl.accessToken,
-//   interactive: false,
+//   // interactive: false,
 // });
 // map.addControl(directions, "top-left");
 
 const marker = new mapboxgl.Marker().setLngLat(start).addTo(map);
+
+class InstructionsControl {
+  onAdd(map) {
+    this._map = map;
+    this._container = document.createElement("div");
+    this._container.className = "mapboxgl-ctrl-directions mapboxgl-ctrl";
+    this._container.innerHTML =
+      '<div class="directions-control directions-control-instructions"><div class="directions-control directions-control-directions"><div class="mapbox-directions-instructions"><div id="kek" class="mapbox-directions-instructions-wrapper"></div></div></div></div>';
+    return this._container;
+  }
+  onRemove() {
+    this._container.parentNode.removeChild(this._container);
+    this._map = undefined;
+  }
+}
+map.addControl(new InstructionsControl(), "top-left");
 
 // Add zoom and rotation controls to the map
 map.addControl(new mapboxgl.NavigationControl());
@@ -209,14 +225,27 @@ async function getRoute() {
       },
     });
   }
-  const instructions = document.getElementById("instructions");
+  const instructions = document.getElementById("kek");
   const steps = json2[0].steps;
   console.log(steps);
   let tripInstructions = "";
   steps.forEach((element) => {
     for (const step of element.steps) {
-      tripInstructions += `<li>${step.maneuver.instruction}</li>`;
+      tripInstructions += `<li class="mapbox-directions-step"><div class="mapbox-directions-step-maneuver">${step.maneuver.instruction}</div></li>`;
     }
   });
-  instructions.innerHTML = `<ol>${tripInstructions}</ol>`;
+  instructions.innerHTML = `<ol class="mapbox-directions-steps">${tripInstructions}</ol>`;
+ 
+  
+  // Create a 'LngLatBounds' with both corners at the first coordinate.
+  const bounds = new mapboxgl.LngLatBounds(data2[0], data2[0]);
+
+  // Extend the 'LngLatBounds' to include every coordinate in the bounds result.
+  for (const coord of data2) {
+    bounds.extend(coord);
+  }
+
+  map.fitBounds(bounds, {
+    padding: 70,
+  });
 }

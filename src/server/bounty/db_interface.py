@@ -1,3 +1,4 @@
+from copy import deepcopy
 from flask import request, make_response
 from ..models import Bin, db, Bounty, User
 from flask import jsonify
