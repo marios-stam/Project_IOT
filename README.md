@@ -6,6 +6,8 @@
 `pip install -r /path/to/requirements.txt`
 
 ### Run
+Run all files from the /src directory ONLY
+
 Start server (default is localhost on port 5000)
 `python wsgi.py`
 
