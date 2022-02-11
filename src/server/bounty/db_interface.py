@@ -185,7 +185,7 @@ def complete_bounty(bounty_id, usr_id):
     bounty = get_bounty(bounty_id).json
     points = deepcopy(bounty['points'])
     type = deepcopy(bounty['type'])
-    sensor_id = deepcopy(bounty['sensor_id'])
+    sensor_id = deepcopy(bounty['bin_id'])
     if len(bounty) == 0:
         return make_response(f"Bounty with id {bounty_id} not found!", 404)
     if bounty['assigned_usr_id'] != usr_id:
@@ -216,7 +216,7 @@ def complete_bounty(bounty_id, usr_id):
     })
     
     # Update user
-    setattr(usr[0], 'points', int(usr[0].__dict__['points']) + int(points))
+    setattr(usr[0], 'points', int(usr[0].points) + int(points))
     db.session.commit()
 
     return make_response(f"Succesfully closed bounty {bounty_id} and awarded {usr_id} with {bounty['points']} points")

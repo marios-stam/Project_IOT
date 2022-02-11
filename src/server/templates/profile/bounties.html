@@ -1,0 +1,66 @@
+{% extends "base.html" %} {% block title %} Your Profile {% endblock %} {% block
+head %}
+
+<meta name="user_id" content="{{ current_user.id }}" />
+
+{% endblock %} {% block content %}
+
+<div>
+  <img src="{{ url_for('static', filename='images/keep-clean.png') }}" />
+  <h1>Your Bounties</h1>
+  <span>Review your pending bounties.</span>
+</div>
+
+<div id="main">
+
+</div>
+
+<div class="container my-4" style="max-width: 440px">
+  <div class="list-group">
+    {% for b in bounties %}
+    <div class="list-group-item list-group-item-action">
+      <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1">Bounty ID: {{ b.id }}</h5>
+        <small id="time-left" class="text-muted"
+          >{{ b.time_assigned.strftime("%m/%d/%Y, %H:%M") }}</small
+        >
+      </div>
+      <p class="mb-1">{{ b.message }}</p>
+      <small class="text-muted"
+        >Points awarded if complete: <strong>{{ b.points}}</strong></small
+      >
+      <div class="m-2">
+        <button class="btn btn-primary" onclick="completeBounty('{{ b.id }}')">
+          Get it done
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  async function completeBounty(bId) {
+    element = document.createElement("div");
+    element.setAttribute("class", "spinner-border m-3");
+    element.setAttribute("role", "status");
+    element.innerHTML = '<span class="visually-hidden">Loading...</span>';
+    document.getElementById("main").appendChild(element);
+    const sdata = {
+      id: parseInt(bId),
+      assigned_usr_id: parseInt(
+        document.querySelector('meta[name="user_id"]').content
+      ),
+    };
+    console.log(sdata);
+    await fetch("/bounties/complete_bounty", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(sdata),
+    });
+    location.reload();
+  }
+</script>
+{% endblock %}
