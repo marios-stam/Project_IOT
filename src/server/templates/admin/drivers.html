@@ -1,5 +1,99 @@
-{% extends "admin/base.html" %} {% block title %} Index {% endblock %} {% block head %}
-{% endblock %} {% block content %}
+{% extends "admin/base.html" %} {% block title %}Drivers{% endblock %} {% block
+head %} {% endblock %} {% block content %}
 
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %}
+  <div class="row mb-3 mx-auto" style="max-width: 440px">
+    {% for category, message in messages %}
+    <div
+      class="m-0 alert alert-{{ category }} alert-dismissible fade show text-start"
+      role="alert"
+    >
+      {{ message[0] }}
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+      ></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %} {% endwith %}
+  <p class="h3">Add a new driver</p>
+  <div class="row mb-5">
+    <div class="col d-flex justify-content-center">
+      <form
+        class="row w-100 border border-dark p-3 bg-light"
+        style="max-width: 660px"
+        method="POST"
+      >
+        {{ form.hidden_tag() }}
+        <div class="col-md-6 mb-2">
+          {{ form.username.label }} {{ form.username(class="form-control") }}
+        </div>
+        <div class="col-md-6 mb-2">
+          {{ form.email.label }} {{ form.email(class="form-control") }}
+        </div>
+        <div class="col-md-6 mb-2">
+          {{ form.password.label }} {{ form.password(class="form-control") }}
+        </div>
+        <div class="col-md-6 mb-2">
+          {{ form.confirm.label }} {{ form.confirm(class="form-control") }}
+        </div>
+        <div class="mt-2 mx-auto">
+          <input type="submit" class="btn btn-primary" value="Submit" />
+        </div>
+      </form>
+    </div>
+  </div>
+  <p class="h3">Total number of drivers: {{ drivers_num }}</p>
+  <div class="row">
+    <div class="col d-flex justify-content-center">
+      <table
+        class="table table-striped border border-dark align-middle"
+        style="max-width: 660px"
+      >
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Username</th>
+            <th scope="col">Email Address</th>
+            <th scope="col">Created At</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in drivers %}
+          <tr>
+            <th scope="row">{{ d.id }}</th>
+            <td>{{ d.username }}</td>
+            <td>{{ d.email }}</td>
+            <td>{{ d.created.strftime("%m/%d/%Y, %H:%M:%S") }}</td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-danger btn-sm w-100"
+                onclick="deleteDriver('{{d.username}}', '{{d.id}}')"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
+<script>
+  function deleteDriver(username, id) {
+    let text = `Deleting ${username}'s account.\nThis is permanent. Do you want to proceed?`;
+    if (confirm(text) == true) {
+      location.href = `drivers/delete/${id}`;
+    }
+  }
+</script>
 {% endblock %}

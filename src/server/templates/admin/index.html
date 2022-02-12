@@ -1,4 +1,4 @@
-{% extends "admin/base.html" %} {% block title %} Index {% endblock %} {% block head %}
+{% extends "admin/base.html" %} {% block title %}Index{% endblock %} {% block head %}
 {% endblock %} {% block content %}
 
 <div
@@ -13,7 +13,7 @@
         style="max-height: 100px; max-width: 100px"
       />
       <div class="card-body">
-        <h5 class="card-title">Citizens</h5>
+        <a href="{{ url_for('admin_blueprint.citizens') }}" class="card-title h5">Citizens</a>
         <p class="card-text">
           View how many citizens are active and the leaderboard for the rewards.
         </p>
@@ -28,7 +28,7 @@
         style="max-height: 100px; max-width: 100px"
       />
       <div class="card-body">
-        <h5 class="card-title">Drivers</h5>
+        <a href="{{ url_for('admin_blueprint.drivers') }}" class="card-title h5">Drivers</a>
         <p class="card-text">
           Add or remove driver accounts and review the last routes of each
           driver.
@@ -44,7 +44,7 @@
         style="max-height: 100px; max-width: 100px"
       />
       <div class="card-body">
-        <h5 class="card-title">Bins</h5>
+        <a href="{{ url_for('admin_blueprint.bins') }}" class="card-title h5">Bins</a>
         <p class="card-text">
           Monitor the situation of bins and get picture of the infrastructure.
         </p>
@@ -59,7 +59,7 @@
         style="max-height: 100px; max-width: 100px"
       />
       <div class="card-body">
-        <h5 class="card-title">Reports</h5>
+        <a href="{{ url_for('admin_blueprint.reports') }}" class="card-title h5">Reports</a>
         <p class="card-text">
           Inspect reports by users about problems and approve them or reject.
         </p>
