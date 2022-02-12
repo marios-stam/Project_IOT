@@ -5,7 +5,7 @@ from flask import request, jsonify
 import geopy.distance
 from datetime import datetime
 from ..bounty.db_interface import create_bounty
-from ..__config__ import *
+from ..constants import consts
 
 
 def tested():
@@ -66,10 +66,10 @@ def create_bin(data=None):
     if data == None:
         data = request.get_json()
 
-    if data['fall_status'] or data['fire_status'] or data['fire_status'] < BATTERY_THRESHOLD:
+    if data['fall_status'] or data['fire_status'] or data['fire_status'] < consts['BATTERY_THRESHOLD']:
         prev = get_bin(data['sensor_id']).json
 
-    if data['fill_level'] > FILL_CRITICAL:
+    if data['fill_level'] > consts['FILL_CRITICAL']:
         data['status'] = 'need_truck'
 
     if data['fall_status'] and not prev['fall_status']:
@@ -81,7 +81,7 @@ def create_bin(data=None):
             'bin_id': data['sensor_id'],
             'message': 'Bin has been tipped over! Please turn it back normally.',
             'type': 'fall',
-            'points': FALL_POINTS,
+            'points': consts['FALL_POINTS'],
             'completed': False
         })
 
@@ -94,11 +94,11 @@ def create_bin(data=None):
             'bin_id': data['sensor_id'],
             'message': 'Bin is on fire! Please put it out and call proper authorities.',
             'type': 'fire',
-            'points': FIRE_POINTS,
+            'points': consts['FIRE_POINTS'],
             'completed': False
         })
 
-    if data['battery'] <= BATTERY_THRESHOLD and prev['battery'] > BATTERY_THRESHOLD:
+    if data['battery'] <= consts['BATTERY_THRESHOLD'] and prev['battery'] > consts['BATTERY_THRESHOLD']:
         print("Bin low battery")
         create_bounty({
             'timestamp': data['timestamp'],
@@ -107,7 +107,7 @@ def create_bin(data=None):
             'bin_id': data['sensor_id'],
             'message': 'Sensor battery is low on power! Please charge.',
             'type': 'battery',
-            'points': CHARGE_POINTS,
+            'points': consts['CHARGE_POINTS'],
             'completed': False
         })
 

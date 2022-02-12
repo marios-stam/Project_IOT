@@ -1,14 +1,12 @@
 from flask import request, make_response
-from ..models import Bin, db, Bounty, User
+from ..models import db, Bounty, User
 from flask import jsonify
 from datetime import datetime as dt
 from ..utils import diff_time
-from ..__config__ import BOUNTY_DEADLINE
 import geopy.distance
-from datetime import datetime
 from copy import deepcopy
 import requests
-
+from ..constants import consts
 
 def get_bounty(bounty_id=None):
     result = db.session.query(Bounty).filter(Bounty.id == bounty_id).all()
@@ -87,7 +85,7 @@ def get_all_bounties():
             'completed': bounty['completed'],
         }
 
-        if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], datetime.now()) > BOUNTY_DEADLINE and not bounty['completed']:
+        if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], dt.now()) > consts['BOUNTY_DEADLINE'] and not bounty['completed']:
             refresh.append(bounty['id'])
             bounty_json['assigned_usr_id'] = None
             bounty_json['time_assigned'] = None
@@ -141,7 +139,7 @@ def get_uncompleted_bounties_in_radius():
     for bounty in result:
         distance = geopy.distance.distance(pos, (bounty['long'], bounty['lat'])).km
 
-        if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], datetime.now()) > BOUNTY_DEADLINE and not bounty['completed']:
+        if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], dt.now()) > consts['BOUNTY_DEADLINE'] and not bounty['completed']:
             refresh.append(bounty['id'])
             flag = True
 
@@ -172,7 +170,7 @@ def assign_bounty(bounty_id, usr_id):
 
     update_bounty({
         'id': bounty_id,
-        'time_assigned': datetime.now(),
+        'time_assigned': dt.now(),
         'assigned_usr_id': usr_id
     })
 
@@ -234,7 +232,7 @@ def get_uncompleted_bounties_of_user(usr_id):
     for i in range(len(result)):
         bounty = result[i].__dict__
 
-        if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], datetime.now()) > BOUNTY_DEADLINE and not bounty['completed']:
+        if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], dt.now()) > consts['BOUNTY_DEADLINE'] and not bounty['completed']:
             refresh.append(bounty['id'])
         else:
             bounty_json = {
@@ -266,7 +264,7 @@ def check_unassign_usr(bounty):
     if bounty['assigned_usr_id'] is None:
         return False
 
-    elif diff_time(bounty['time_assigned'], datetime.now()) > BOUNTY_DEADLINE and not bounty['completed']:
+    elif diff_time(bounty['time_assigned'], dt.now()) > consts['BOUNTY_DEADLINE'] and not bounty['completed']:
         print(f"Unissigning user {bounty['assigned_usr_id']} from bounty {bounty['id']}! Time limit exceeded.")
         update_bounty({
             'id': bounty['id'],
