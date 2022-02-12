@@ -180,9 +180,9 @@ async function drawBins() {
         features: [],
       };
       data.forEach((element) => {
-        if (element.fill_level <= 60) {
+        if (element.fill_level <= 0.6) {
           binColor = "green";
-        } else if (element.fill_level <= 80) {
+        } else if (element.fill_level <= 0.8) {
           binColor = "orange";
         } else {
           binColor = "red";
