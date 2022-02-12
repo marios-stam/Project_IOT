@@ -7,7 +7,6 @@ from .__config__ import *
 
 
 class Sensor:
-    interval = 60 ** 2
 
     def __init__(self, pipe, sensor_id, server, position=None):
 
@@ -86,7 +85,7 @@ class Sensor:
             requests.put(self.server + "/bins", json=msg)
             print("Sent message to server at", msg['timestamp'])
         except requests.exceptions.ConnectionError:
-            print("Server unreachable")
+            print(__name__, "Server unreachable")
 
     def loop(self, pipe):
         self.fullness = rand_perc()
@@ -134,6 +133,8 @@ class Sensor:
 
 
 class SensorGateway:
+    RUNNING = False
+
     def __init__(self, server):
         super().__init__()
 
@@ -147,9 +148,11 @@ class SensorGateway:
             self.sensors[tmp_id] = Sensor(child, tmp_id, server)
             self.pipes[tmp_id] = parent
 
-        # self.start_processes()
-
     def start_processes(self):
+        if SensorGateway.RUNNING:
+            return
+
+        SensorGateway.RUNNING = True
         for sensor in self.sensors:
             self.sensors[sensor].process.start()
 
