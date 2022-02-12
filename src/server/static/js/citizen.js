@@ -98,9 +98,6 @@ geolocate.on("error", () => {
 
 async function drawBins() {
   const arrays = await getBins();
-
-  console.log(arrays[0], arrays[1]);
-
   if (arrays[1].features.length != 0) {
     map.addSource("problems", {
       type: "geojson",
@@ -157,13 +154,15 @@ async function drawBins() {
     .querySelector(".bin-radius")
     .addEventListener("change", async (event) => {
       r = event.target.value;
-      const geojson = await getBins(updateSource);
-      map.getSource("bins").setData(geojson);
+      const arrays = await getBins(updateSource);
+      map.getSource("bins").setData(arrays[0]);
+      map.getSource("problems").setData(arrays[1]);
     });
 
   const updateSource = setInterval(async () => {
-    const geojson = await getBins(updateSource);
-    map.getSource("bins").setData(geojson);
+    const arrays = await getBins(updateSource);
+    map.getSource("bins").setData(arrays[0]);
+    map.getSource("problems").setData(arrays[1]);
   }, 1000000);
 
   async function getBins(updateSource) {
@@ -189,8 +188,6 @@ async function drawBins() {
           binColor = "red";
         }
         needCharge = false;
-        console.log(element.fire_status);
-        console.log(element.fall_status);
         if (
           element.battery <= 0.25 ||
           element.fire_status ||
@@ -260,7 +257,6 @@ map.on("click", "bins", (e) => {
   let popupHTML = `<strong>Bin ID: ${sensor_id}</strong><br>Latitude: ${latitude}<br>Longitude: ${longitude}<br>Fill Level: ${fill_level.toFixed(
     1
   )}%<br>Battery: ${battery.toFixed(1)}%<br><hr>`;
-  console.log(battery, fire_status, fall_status);
   let errors = false;
   if (battery <= 25) {
     popupHTML += `🔋 This bin is low on battery! <br>`;
@@ -286,6 +282,7 @@ async function getBounties() {
     // const sdata = { long: userLong, lat: userLat, radius: r };
     // const response = await fetch("/bounties/in_radius", {
     let sdata = { long: userLong, lat: userLat, radius: r };
+    console.log(sdata);
     let response = await fetch("/bounties/in_radius", {
       method: "PUT",
       headers: {
@@ -328,10 +325,8 @@ setInterval(getBounties, 2000);
 
 async function getDirections(binId) {
   directions.removeRoutes();
-  console.log(binId);
   const response = await fetch(fetchUrl);
   const data = await response.json();
-  console.log(data);
   let binLong, binLat;
   data.forEach((element) => {
     if (element.sensor_id == binId) {
@@ -339,7 +334,6 @@ async function getDirections(binId) {
       binLat = element.lat;
     }
   });
-  console.log(binLong, binLat);
   directions.setOrigin(start);
   directions.setDestination([binLong, binLat]);
 }

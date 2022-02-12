@@ -111,8 +111,9 @@ async function drawBins() {
   });
 
   const updateSource = setInterval(async () => {
-    const geojson = await getBins(updateSource);
-    map.getSource("bins").setData(geojson);
+    const arrays = await getBins(updateSource);
+    map.getSource("bins").setData(arrays[0]);
+    map.getSource("problems").setData(arrays[1]);
   }, 1000);
 
   async function getBins(updateSource) {
@@ -138,8 +139,6 @@ async function drawBins() {
           binColor = "red";
         }
         needCharge = false;
-        console.log(element.fire_status);
-        console.log(element.fall_status);
         if (
           element.battery <= 0.25 ||
           element.fire_status ||
@@ -209,7 +208,6 @@ map.on("click", "bins", (e) => {
   let popupHTML = `<strong>Bin ID: ${sensor_id}</strong><br>Latitude: ${latitude}<br>Longitude: ${longitude}<br>Fill Level: ${fill_level.toFixed(
     1
   )}%<br>Battery: ${battery.toFixed(1)}%<br><hr>`;
-  console.log(battery, fire_status, fall_status);
   let errors = false;
   if (battery <= 25) {
     popupHTML += `🔋 This bin is low on battery! <br>`;
