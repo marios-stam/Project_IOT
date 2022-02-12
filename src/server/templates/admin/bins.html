@@ -1,5 +1,16 @@
-{% extends "admin/base.html" %} {% block title %} Index {% endblock %} {% block head %}
+{% extends "admin/base.html" %} {% block title %}Bins{% endblock %} {% block head %}
 {% endblock %} {% block content %}
-
+<div class="container">
+    <p class="h3">Leaderboard</p>
+  <div class="row mb-5">
+    <div class="col d-flex justify-content-center">
+    </div>
+  </div>
+  <p class="h3">Active users (last 30 days): {{ active_num }}</p>
+  <div class="row">
+    <div class="col d-flex justify-content-center">
+    </div>
+  </div>
+</div>
 
 {% endblock %}

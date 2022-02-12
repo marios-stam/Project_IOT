@@ -16,7 +16,7 @@
 
     {% block head %}{% endblock %}
 
-    <title>{% block title %}{% endblock %} · CC Manager</title>
+    <title>Admin/{% block title %}{% endblock %} · CleanerCity</title>
     <link
       rel="icon"
       type="image/x-icon"
@@ -137,26 +137,6 @@
 
     <!-- Container -->
     <div class="container text-center d-flex justify-content-center">
-      <!-- Alerts -->
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %}
-      <div class="mb-3 mx-auto" style="max-width: 440px">
-        {% for category, message in messages %}
-        <div
-          class="m-0 alert alert-{{ category }} alert-dismissible fade show text-start"
-          role="alert"
-        >
-          {{ message[0] }}
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-          ></button>
-        </div>
-        {% endfor %}
-      </div>
-      {% endif %} {% endwith %}
       <!-- Content -->
       {% block content %}{% endblock %}
     </div>
