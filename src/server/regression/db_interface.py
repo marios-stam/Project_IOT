@@ -4,7 +4,7 @@ from flask import jsonify
 from datetime import datetime
 from .fill_regressor import fill_regressor as fr
 from ..utils import diff_time
-from ..__config__ import REFRESH_INTERVAL, NUM_MEASUREMENTS
+from ..constants import consts
 
 
 def get_angle(sensor_id):
@@ -17,10 +17,10 @@ def get_angle(sensor_id):
 
         t1 = datetime.strptime(data['timestamp'][:-4], '%Y-%m-%d %H:%M:%S')
         delay = diff_time(t1, datetime.now())
-    if len(result) <= 0 or delay > REFRESH_INTERVAL:
+    if len(result) <= 0 or delay > consts['REFRESH_INTERVAL']:
         data = {
             'sensor_id': sensor_id,
-            'angle': fr(sensor_id, NUM_MEASUREMENTS),
+            'angle': fr(sensor_id, consts['NUM_MEASUREMENTS']),
             'timestamp': datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S.000')
         }
         if len(result) <= 0:

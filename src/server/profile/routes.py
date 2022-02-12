@@ -1,10 +1,8 @@
 from datetime import datetime
-
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
-
 from .. import db
-from ..__config__ import BOUNTY_DEADLINE
+from ..constants import consts
 from ..models import Bounty, User
 from ..utils import diff_time
 from .forms import EditForm
@@ -69,7 +67,7 @@ def get_uncompleted_bounties_of_user(usr_id):
     for i in range(len(result)):
         bounty = result[i].__dict__
 
-        if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], datetime.now()) > BOUNTY_DEADLINE and not bounty['completed']:
+        if bounty['assigned_usr_id'] is not None and diff_time(bounty['time_assigned'], datetime.now()) > consts['BOUNTY_DEADLINE'] and not bounty['completed']:
             refresh.append(bounty['id'])
         else:
             bounty_json = {
