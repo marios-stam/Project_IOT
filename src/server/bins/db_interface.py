@@ -123,9 +123,14 @@ def create_bin(data=None):
 def get_all_bins():
     print("Getting all Bins")  # get bin
 
-    result = db.session.query(Bin).order_by(Bin.timestamp.desc()).all()
-    if(len(result) == 0):
-        return make_response(f"No bin found!")
+    cte = (db.session.query(Bin.sensor_id, db.func.max(Bin.timestamp).label('max_time')).group_by(Bin.sensor_id).cte(name='cte'))
+    result = db.session.query(Bin).join(cte, db.and_(
+        Bin.sensor_id == cte.c.sensor_id,
+        Bin.timestamp == cte.c.max_time
+    )).all()
+
+    # for bin in result:
+    #     print(bin.sensor_id, " --> ", bin.timestamp)
 
     bins = []
     for i in range(len(result)):
@@ -137,6 +142,7 @@ def get_all_bins():
     return jsonify(bins)
 
 
+# This is buggy but not used anywhere
 def get_bins_by_status(status, get_latest_values=True):
     # Getting all bins with 'status' field is same to parameter status
     if get_latest_values:
@@ -163,18 +169,17 @@ def get_bins_in_radius(pos, radius):
     # pos--> (long, lat)
     # radius--> in km
 
-    result = db.session.query(Bin).order_by(Bin.timestamp.desc()).all()
+    result = get_all_bins().json
     if(len(result) == 0):
         return make_response(f"No bin found!")
 
     bins = []
-    for i in range(len(result)):
-        bin = result[i].__dict__
+    for bin in result:
         bin_pos = (bin['long'], bin['lat'])
         distance = geopy.distance.distance(pos, bin_pos).km
 
         if distance <= radius:
-            bin.pop('_sa_instance_state')
+            # bin.pop('_sa_instance_state')
             bins.append(bin)
 
     return jsonify(bins)
