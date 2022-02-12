@@ -16,7 +16,7 @@
 
     {% block head %}{% endblock %}
 
-    <title>{% block title %}{% endblock %} · CleanerCity</title>
+    <title>{% block title %}{% endblock %} · CC Manager</title>
     <link
       rel="icon"
       type="image/x-icon"
@@ -25,34 +25,17 @@
   </head>
 
   <body>
-    <!-- Navbar -->
+    <!-- Navbar 1 -->
     <nav
-      class="navbar navbar-expand-lg navbar-light bg-light mb-3 border-3 border-bottom"
+      class="navbar navbar-expand-lg navbar-light bg-light border-3 border-bottom"
     >
       <div class="container">
-        {% if current_user.role == 'citizen' or not
-        current_user.is_authenticated %}
-        <a
-          class="btn btn-outline-primary me-3"
-          href="{{ url_for('client_blueprint.citizen') }}"
-          role="button"
-          >CleanerCity App</a
-        >
-        {% elif current_user.role == 'driver' %}
-        <a
-          class="btn btn-outline-primary me-3"
-          href="{{ url_for('client_blueprint.driver') }}"
-          role="button"
-          >CleanerCity App</a
-        >
-        {% elif current_user.role == 'manager' %}
         <a
           class="btn btn-outline-primary me-3"
           href="{{ url_for('admin_blueprint.index') }}"
           role="button"
           >CleanerCity App</a
         >
-        {% endif %}
         <button
           class="navbar-toggler"
           type="button"
@@ -69,49 +52,16 @@
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('views.index') }}">Home</a>
             </li>
-            {% if current_user.is_authenticated %}
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('profile_blueprint.view') }}"
                 >Profile</a
               >
             </li>
-            {% if current_user.role == 'citizen' %}
-            <li class="nav-item">
-              <a
-                class="nav-link"
-                href="{{ url_for('profile_blueprint.bounties') }}"
-                >Bounties</a
-              >
-            </li>
-            {% endif %}
-            {% if current_user.role == 'citizen' or current_user.role == 'driver' %}
-            <li class="nav-item">
-              <a
-                class="nav-link"
-                href="{{ url_for('reports_blueprint.view') }}"
-                >Reports</a
-              >
-            </li>
-            {% endif %}
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('auth_blueprint.logout') }}"
                 >Logout</a
               >
             </li>
-            {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('auth_blueprint.login') }}"
-                >Login</a
-              >
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link"
-                href="{{ url_for('auth_blueprint.register') }}"
-                >Register</a
-              >
-            </li>
-            {% endif %}
           </ul>
           {% if current_user.is_authenticated %}
           <span class="navbar-text"
@@ -126,8 +76,67 @@
       </div>
     </nav>
 
+    <!-- Navbar 2 -->
+    <nav
+      class="navbar navbar-expand-sm navbar-dark bg-dark mb-3 border-3 border-bottom"
+    >
+      <div class="container">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav2"
+          aria-controls="navbarNav2"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav2">
+          <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+            <li class="nav-item m-2">
+              <a
+                class="btn btn-primary"
+                role="button"
+                style="width: 110px"
+                href="{{ url_for('admin_blueprint.citizens') }}"
+                >Citizens</a
+              >
+            </li>
+            <li class="nav-item m-2">
+              <a
+                class="btn btn-primary"
+                role="button"
+                style="width: 110px"
+                href="{{ url_for('admin_blueprint.drivers') }}"
+                >Drivers</a
+              >
+            </li>
+            <li class="nav-item m-2">
+              <a
+                class="btn btn-primary"
+                role="button"
+                style="width: 110px"
+                href="{{ url_for('admin_blueprint.bins') }}"
+                >Bins</a
+              >
+            </li>
+            <li class="nav-item m-2">
+              <a
+                class="btn btn-primary"
+                role="button"
+                style="width: 110px"
+                href="{{ url_for('admin_blueprint.reports') }}"
+                >Reports</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
     <!-- Container -->
-    <div class="container text-center">
+    <div class="container text-center d-flex justify-content-center">
       <!-- Alerts -->
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %}

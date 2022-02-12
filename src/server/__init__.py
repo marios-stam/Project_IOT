@@ -35,6 +35,7 @@ def init_app(config_class=Config):
         from .reports import routes
         from .regression import routes
         from .bounty import routes
+        from .admin import routes
 
         # Register Blueprints
         app.register_blueprint(bins.routes.bins_blueprint)
@@ -48,6 +49,7 @@ def init_app(config_class=Config):
         app.register_blueprint(reports.routes.reports_blueprint)
         app.register_blueprint(regression.routes.regression_blueprint)
         app.register_blueprint(bounty.routes.bounties_blueprint)
+        app.register_blueprint(admin.routes.admin_blueprint)
 
         # Create sql tables from data models
         print("Creating SQL Tables")

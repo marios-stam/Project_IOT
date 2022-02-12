@@ -21,11 +21,3 @@ def driver():
     if User.query.get(current_user.id).role != 'driver':
         abort(403)
     return render_template('client/driver.html')
-
-
-@client_blueprint.route('/mngr')
-@login_required
-def mngr():
-    if User.query.get(current_user.id).role != 'mngr':
-        abort(403)
-    return render_template('client/mngr.html')

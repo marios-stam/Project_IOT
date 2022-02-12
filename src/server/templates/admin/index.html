@@ -1,0 +1,71 @@
+{% extends "admin/base.html" %} {% block title %} Index {% endblock %} {% block head %}
+{% endblock %} {% block content %}
+
+<div
+  class="row row-cols-1 row-cols-md-2 g-4 text-dark d-flex justify-content-center"
+  style="max-width: 660px"
+>
+  <div class="col">
+    <div class="card h-100 mx-auto m-1">
+      <img
+        src="{{ url_for('static', filename='images/disposal.png') }}"
+        class="card-img-top mx-auto mt-3"
+        style="max-height: 100px; max-width: 100px"
+      />
+      <div class="card-body">
+        <h5 class="card-title">Citizens</h5>
+        <p class="card-text">
+          View how many citizens are active and the leaderboard for the rewards.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100 mx-auto m-1">
+      <img
+        src="{{ url_for('static', filename='images/garbage-truck.png') }}"
+        class="card-img-top mx-auto mt-3"
+        style="max-height: 100px; max-width: 100px"
+      />
+      <div class="card-body">
+        <h5 class="card-title">Drivers</h5>
+        <p class="card-text">
+          Add or remove driver accounts and review the last routes of each
+          driver.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100 mx-auto m-1">
+      <img
+        src="{{ url_for('static', filename='images/trash-can.png') }}"
+        class="card-img-top mx-auto mt-3"
+        style="max-height: 100px; max-width: 100px"
+      />
+      <div class="card-body">
+        <h5 class="card-title">Bins</h5>
+        <p class="card-text">
+          Monitor the situation of bins and get picture of the infrastructure.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100 mx-auto m-1">
+      <img
+        src="{{ url_for('static', filename='images/report.png') }}"
+        class="card-img-top mx-auto mt-3"
+        style="max-height: 100px; max-width: 100px"
+      />
+      <div class="card-body">
+        <h5 class="card-title">Reports</h5>
+        <p class="card-text">
+          Inspect reports by users about problems and approve them or reject.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

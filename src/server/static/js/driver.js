@@ -55,14 +55,34 @@ map.on("load", () => {
   checkFullness();
 });
 
-
-
 async function drawBins() {
-  const geojson = await getBins();
+  const arrays = await getBins();
+
+  if (arrays[1].features.length != 0) {
+    map.addSource("problems", {
+      type: "geojson",
+      data: arrays[1],
+    });
+
+    map.addLayer({
+      id: "problems",
+      type: "circle",
+      source: "problems",
+      paint: {
+        "circle-radius": {
+          stops: [
+            [12, 3],
+            [20, 30],
+          ],
+        },
+        "circle-color": "#FF00FF",
+      },
+    });
+  }
 
   map.addSource("bins", {
     type: "geojson",
-    data: geojson,
+    data: arrays[0],
   });
 
   map.addLayer({
@@ -97,10 +117,15 @@ async function drawBins() {
 
   async function getBins(updateSource) {
     try {
-      fetchUrl = "/bins/get_all";
+      fetchUrl =
+        "/bins_in_radius?long=" + userLong + "&lat=" + userLat + "&radius=5";
       const response = await fetch(fetchUrl);
       const data = await response.json();
       let geojson = {
+        type: "FeatureCollection",
+        features: [],
+      };
+      let problems = {
         type: "FeatureCollection",
         features: [],
       };
@@ -111,6 +136,32 @@ async function drawBins() {
           binColor = "orange";
         } else {
           binColor = "red";
+        }
+        needCharge = false;
+        console.log(element.fire_status);
+        console.log(element.fall_status);
+        if (
+          element.battery <= 0.25 ||
+          element.fire_status ||
+          element.fall_status
+        ) {
+          needCharge = true;
+          problems.features.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [element.long, element.lat],
+            },
+            properties: {
+              color: binColor,
+              sensor_id: element.sensor_id,
+              fill_level: element.fill_level,
+              battery: element.battery,
+              fall_status: element.fall_status,
+              fire_status: element.fire_status,
+              needCharge: needCharge,
+            },
+          });
         }
         geojson.features.push({
           type: "Feature",
@@ -123,10 +174,13 @@ async function drawBins() {
             sensor_id: element.sensor_id,
             fill_level: element.fill_level,
             battery: element.battery,
+            fall_status: element.fall_status,
+            fire_status: element.fire_status,
+            needCharge: needCharge,
           },
         });
       });
-      return geojson;
+      return [geojson, problems];
     } catch (err) {
       if (updateSource) clearInterval(updateSource);
       throw new Error(err);
@@ -147,14 +201,32 @@ map.on("click", "bins", (e) => {
   const sensor_id = e.features[0].properties.sensor_id;
   const fill_level = e.features[0].properties.fill_level * 100;
   const battery = e.features[0].properties.battery * 100;
+  const fall_status = e.features[0].properties.fall_status;
+  const fire_status = e.features[0].properties.fire_status;
   while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
     coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
   }
-  const popupHTML = `<strong>Bin ID: ${sensor_id}</strong><br>Latitude: ${latitude}<br>Longitude: ${longitude}<br>Fill Level: ${fill_level.toFixed(
+  let popupHTML = `<strong>Bin ID: ${sensor_id}</strong><br>Latitude: ${latitude}<br>Longitude: ${longitude}<br>Fill Level: ${fill_level.toFixed(
     1
-  )}%<br>Battery: ${battery.toFixed(
-    1
-  )}%<br><a href="#">Report Problem</a><br><a href="/">Get Directions</a><hr><button class="btn btn-outline-success btn-sm" onclick="chargeSensor(${sensor_id})">Charge Sensor</button>`;
+  )}%<br>Battery: ${battery.toFixed(1)}%<br><hr>`;
+  console.log(battery, fire_status, fall_status);
+  let errors = false;
+  if (battery <= 25) {
+    popupHTML += `🔋 This bin is low on battery! <br>`;
+    errors = true;
+  }
+  if (fire_status) {
+    popupHTML += `🔥 This bin is on fire! Call 911!<br>`;
+    errors = true;
+  }
+  if (fall_status) {
+    popupHTML += `🚯 This bin is tipped over!<br>`;
+    errors = true;
+  }
+  if (errors) {
+    popupHTML += `<hr>`;
+  }
+  popupHTML += `<div class="row d-flex justify-content-evenly"><a class="col-8 btn btn-danger btn-sm" href="/rpt/create/${e.features[0].properties.sensor_id}" role="button">Report Problem</a></div>`;
   new mapboxgl.Popup().setLngLat(coordinates).setHTML(popupHTML).addTo(map);
 });
 
