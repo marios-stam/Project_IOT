@@ -6,7 +6,7 @@ from flask_login import current_user, login_required
 from werkzeug.security import generate_password_hash
 
 from .. import db
-from ..models import User
+from ..models import Report, User
 from .forms import DriverForm
 
 admin_blueprint = Blueprint('admin_blueprint', __name__, url_prefix='/admin')
@@ -86,4 +86,35 @@ def bins():
 def reports():
     if User.query.get(current_user.id).role != 'manager':
         abort(403)
-    return render_template('admin/reports.html')
+    reports = Report.query.filter_by(status='unconfirmed').order_by(Report.updated).all()
+    rpt_num = len(reports)
+    users = []
+    for r in reports:
+        users.append(User.query.get(r.user_id))
+    return render_template('admin/reports.html', users=users, reports=reports, rpt_num=rpt_num)
+
+
+@admin_blueprint.route('/reports/confirm/<id>')
+@login_required
+def confirm(id):
+    if User.query.get(current_user.id).role != 'manager':
+        abort(403)
+    report = Report.query.get(id)
+    user = User.query.get(report.user_id)
+    report.status = 'confirmed'
+    user.points = user.points + 5
+    db.session.commit()
+    return redirect(url_for('admin_blueprint.reports'))
+
+
+@admin_blueprint.route('/reports/reject/<id>')
+@login_required
+def reject(id):
+    if User.query.get(current_user.id).role != 'manager':
+        abort(403)
+    report = Report.query.get(id)
+    user = User.query.get(report.user_id)
+    report.status = 'rejected'
+    user.points = user.points - 5
+    db.session.commit()
+    return redirect(url_for('admin_blueprint.reports'))

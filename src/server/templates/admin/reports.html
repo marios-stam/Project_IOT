@@ -1,16 +1,80 @@
-{% extends "admin/base.html" %} {% block title %}Reports{% endblock %} {% block head %}
-{% endblock %} {% block content %}
-
+{% extends "admin/base.html" %} {% block title %}Reports{% endblock %} {% block
+head %} {% endblock %} {% block content %}
 <div class="container">
-    <p class="h3">Leaderboard</p>
+  <p class="h3">Total pending reports: {{rpt_num}}</p>
   <div class="row mb-5">
     <div class="col d-flex justify-content-center">
+      <div class="accordion" id="accordion" style="width: 660px">
+        {% for r in reports %}
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="heading{{r.report_id}}">
+            {% if loop.index == 1 %}
+            <button
+              class="accordion-button"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapse{{r.report_id}}"
+              aria-expanded="true"
+              aria-controls="collapse{{r.report_id}}"
+            >
+              Report with ID "<strong>{{ r.report_id }}</strong>", by user
+              "<strong> {{ users[loop.index-1].username }}</strong>"
+            </button>
+            {% else %}
+            <button
+              class="accordion-button collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapse{{r.report_id}}"
+              aria-expanded="false"
+              aria-controls="collapse{{r.report_id}}"
+            >
+              Report with ID "<strong>{{ r.report_id }}</strong>", by user
+              "<strong> {{ users[loop.index-1].username }}</strong>"
+            </button>
+            {% endif %}
+          </h2>
+          {% if loop.index == 1 %}
+          <div
+            id="collapse{{r.report_id}}"
+            class="accordion-collapse collapse show"
+            aria-labelledby="heading_{{r.report_id}}"
+            data-bs-parent="#accordion"
+          >
+            {% else %}
+            <div
+              id="collapse{{r.report_id}}"
+              class="accordion-collapse collapse"
+              aria-labelledby="heading_{{r.report_id}}"
+              data-bs-parent="#accordion"
+            >
+              {% endif %}
+              <div class="accordion-body">
+                <strong>Description of problem: </strong>
+                {{ r.details }}
+                <div class="row justify-content-center mt-3">
+                  <a
+                    class="btn btn-success mx-2"
+                    href="reports/confirm/{{r.report_id}}"
+                    role="button"
+                    style="max-width: 100px"
+                    >Confirm</a
+                  >
+                  <a
+                    class="btn btn-danger mx-2"
+                    href="reports/reject/{{r.report_id}}"
+                    role="button"
+                    style="max-width: 100px"
+                    >Reject</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
     </div>
   </div>
-  <p class="h3">Active users (last 30 days): {{ active_num }}</p>
-  <div class="row">
-    <div class="col d-flex justify-content-center">
-    </div>
-  </div>
+  {% endblock %}
 </div>
-{% endblock %}
