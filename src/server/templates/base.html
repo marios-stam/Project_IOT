@@ -30,8 +30,8 @@
       class="navbar navbar-expand-lg navbar-light bg-light mb-3 border-3 border-bottom"
     >
       <div class="container">
-        {% if current_user.role == 'citizen' or not current_user.is_authenticated
-        %}
+        {% if current_user.role == 'citizen' or not
+        current_user.is_authenticated %}
         <a
           class="btn btn-outline-primary me-3"
           href="{{ url_for('client_blueprint.citizen') }}"
@@ -75,6 +75,22 @@
                 >Profile</a
               >
             </li>
+            {% if current_user.role == 'citizen' %}
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{{ url_for('profile_blueprint.bounties') }}"
+                >Bounties</a
+              >
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{{ url_for('reports_blueprint.view') }}"
+                >Reports</a
+              >
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('auth_blueprint.logout') }}"
                 >Logout</a
@@ -101,8 +117,8 @@
             <strong>{{ current_user.username }}</strong> | {% if
             current_user.role == 'citizen' %} Reward points:
             <strong>{{ current_user.points }}</strong>{% elif current_user.role
-            == 'driver' %} User type: <strong>Driver</strong>{% else %} User type:
-            <strong>Manager</strong></span
+            == 'driver' %} User type: <strong>Driver</strong>{% else %} User
+            type: <strong>Manager</strong></span
           >{% endif %} {% endif %}
         </div>
       </div>

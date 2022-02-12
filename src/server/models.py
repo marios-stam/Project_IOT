@@ -61,6 +61,8 @@ class User(db.Model, UserMixin):
         nullable=False
     )
 
+    reports = db.relationship('Report', backref='user', passive_deletes=True)
+
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
@@ -204,12 +206,13 @@ class Report(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        foreign_key='Users.id',
+        db.ForeignKey('Users.id', ondelete="CASCADE"),
         nullable=False
     )
 
     details = db.Column(
-        db.Text
+        db.Text,
+        nullable=False
     )
 
     status = db.Column(

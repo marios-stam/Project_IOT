@@ -277,7 +277,7 @@ map.on("click", "bins", (e) => {
   if (errors) {
     popupHTML += `<hr>`;
   }
-  popupHTML += `<div class="row d-flex justify-content-evenly"><button class="col-5 btn btn-primary btn-sm" onclick="getDirections('${e.features[0].properties.sensor_id}')">Get Directions</button><button class="col-5 btn btn-danger btn-sm">Report Problem</button></div>`;
+  popupHTML += `<div class="row d-flex justify-content-evenly"><button class="col-5 btn btn-primary btn-sm" onclick="getDirections('${e.features[0].properties.sensor_id}')">Get Directions</button><a class="col-5 btn btn-danger btn-sm" href="/rpt/create/${e.features[0].properties.sensor_id}" role="button">Report Problem</a></div>`;
   new mapboxgl.Popup().setLngLat(coordinates).setHTML(popupHTML).addTo(map);
 });
 

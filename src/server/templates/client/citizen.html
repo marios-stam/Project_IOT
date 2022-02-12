@@ -74,6 +74,22 @@
                 >Profile</a
               >
             </li>
+            {% if current_user.role == 'citizen' %}
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{{ url_for('profile_blueprint.bounties') }}"
+                >Bounties</a
+              >
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="{{ url_for('reports_blueprint.view') }}"
+                >Reports</a
+              >
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('auth_blueprint.logout') }}"
                 >Logout</a
