@@ -1,16 +1,439 @@
-{% extends "admin/base.html" %} {% block title %}Bins{% endblock %} {% block head %}
+{% extends "admin/base.html" %} {% block title %}Bins{% endblock %} {% block
+head %}
+<link
+  href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css"
+  rel="stylesheet"
+/>
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+{% endblock %} {% block map %}
+<div class="mt-5" id="map" style="height: 440px"></div>
 {% endblock %} {% block content %}
-<div class="container">
-    <p class="h3">Leaderboard</p>
+
+<div class="container-fluid">
   <div class="row mb-5">
-    <div class="col d-flex justify-content-center">
-    </div>
+    <div class="col d-flex justify-content-center"></div>
   </div>
-  <p class="h3">Active users (last 30 days): {{ active_num }}</p>
+  <p class="h3">Total number of bins: ({{bins_num}})</p>
   <div class="row">
-    <div class="col d-flex justify-content-center">
+    <div class="table-responsive">
+      <table
+        class="table table-hover table-bordered border border-dark align-middle"
+      >
+        <thead class="table-dark">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Sensor ID</th>
+            <th scope="col">Position (Lat., Long.)</th>
+            <th scope="col">Fill Level</th>
+            <th scope="col">Battery Level</th>
+            <th scope="col">Fall Status</th>
+            <th scope="col">Fire Status</th>
+            <th scope="col">Temperature</th>
+            <th scope="col">Timestamp</th>
+            <th scope="col">Time Online</th>
+            <th scope="col">Orientation</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in bins.items %}
+          <tr id="{{ b.sensor_id }}">
+            <th scope="row">{{loop.index}}</th>
+            <td>{{ b.sensor_id }}</td>
+            <td>
+              <button
+                class="btn btn-secondary"
+                role="button"
+                onclick="flyToCoords('{{b.long}}', '{{b.lat}}')"
+              >
+                ({{ "%.5f"|format(b.lat) }}, {{ "%.5f"|format(b.long) }})
+              </button>
+            </td>
+            <td>{{ "%.1f"|format(b.fill_level*100) }} %</td>
+            <td id="{{ b.sensor_id }}-batt">
+              {{ "%.1f"|format(b.battery*100) }} %
+            </td>
+            <td id="{{ b.sensor_id }}-fall">
+              {% if b.fall_status %}{{ b.fall_status }}{% endif %}
+            </td>
+            <td id="{{ b.sensor_id }}-fire">
+              {% if b.fire_status %}{{ b.fire_status }}{% endif %}
+            </td>
+            <td>{{ "%.1f"|format(b.temperature) }} ℃</td>
+            <td>{{ b.timestamp[:-4] }}</td>
+            <td>{{ b.time_online }}</td>
+            <td>{{ b.orientation }}</td>
+            <td>
+              <button type="button" class="btn btn-primary btn-sm w-100">
+                Show Chart
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
+
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center my-3">
+      {% for page in bins.iter_pages() %} {% if page %} {% if page != bins.page
+      %}
+      <li class="page-item">
+        <a class="page-link" href="bins?page={{page}}">{{ page }}</a>
+      </li>
+      {% else %}
+      <li class="page-item active" aria-current="page">
+        <a class="page-link">{{ page }}</a>
+      </li>
+      {% endif %} {% endif %} {% endfor %}
+    </ul>
+  </nav>
 </div>
+
+<script>
+  userLong = 21.735;
+  userLat = 38.246;
+  r = 1;
+  mapboxgl.accessToken =
+    "pk.eyJ1IjoicXdlcnRxd2VydCIsImEiOiJja3o5em84aHEwMWFuMnZwZjlyNmRjOG16In0.LQhfH1fxUa4Vds54POk2Xw";
+  const map = new mapboxgl.Map({
+    container: "map",
+    style: "mapbox://styles/mapbox/light-v10",
+    center: [userLong, userLat],
+    zoom: 15,
+  });
+  map.addControl(new mapboxgl.NavigationControl());
+  class BinRadiusControl {
+    onAdd(map) {
+      this._map = map;
+      this._container = document.createElement("div");
+      this._container.className = "mapboxgl-ctrl";
+      this._container.innerHTML =
+        "<div class='border rounded border-2 p-2 bg-gradient bg-light d-flex justify-content-center' style='border-color: #d1d1d0; width: 302px;'><label>Radius for bins: <select class='bin-radius' name='bin-radius'><option value='10'>10,000 m</option><option value='5'>5,000 m</option><option value='2.5'>2,500 m</option><option value='1' selected>1,000 m</option><option value='0.5'>500 m</option>";
+      return this._container;
+    }
+    onRemove() {
+      this._container.parentNode.removeChild(this._container);
+      this._map = undefined;
+    }
+  }
+  map.addControl(new BinRadiusControl(), "top-left");
+  map.on("load", () => {
+    drawBins();
+  });
+  async function drawBins() {
+    const arrays = await getBins();
+    if (arrays[1].features.length != 0) {
+      map.addSource("problems", {
+        type: "geojson",
+        data: arrays[1],
+      });
+
+      map.addLayer({
+        id: "problems",
+        type: "circle",
+        source: "problems",
+        paint: {
+          "circle-radius": {
+            stops: [
+              [12, 3],
+              [20, 30],
+            ],
+          },
+          "circle-color": "#FF00FF",
+        },
+      });
+    }
+
+    map.addSource("bins", {
+      type: "geojson",
+      data: arrays[0],
+    });
+
+    map.addLayer({
+      id: "bins",
+      type: "circle",
+      source: "bins",
+      paint: {
+        "circle-radius": {
+          stops: [
+            [12, 2],
+            [20, 20],
+          ],
+        },
+        "circle-color": [
+          "match",
+          ["get", "color"],
+          "green",
+          "#008000",
+          "orange",
+          "#FF8000",
+          "red",
+          "#FF0000",
+          "#FF00FF",
+        ],
+      },
+    });
+
+    map.addLayer(
+      {
+        id: "bins-heat",
+        type: "heatmap",
+        source: "bins",
+        maxzoom: 15,
+        paint: {
+          "heatmap-weight": {
+            property: "dbh",
+            type: "exponential",
+            stops: [
+              [1, 0],
+              [62, 1],
+            ],
+          },
+          "heatmap-intensity": {
+            stops: [
+              [11, 1],
+              [15, 3],
+            ],
+          },
+          "heatmap-color": [
+            "interpolate",
+            ["linear"],
+            ["heatmap-density"],
+            0,
+            "rgba(236,222,239,0)",
+            0.2,
+            "rgb(208,209,230)",
+            0.4,
+            "rgb(166,189,219)",
+            0.6,
+            "rgb(103,169,207)",
+            0.8,
+            "rgb(28,144,153)",
+          ],
+          "heatmap-radius": {
+            stops: [
+              [11, 15],
+              [15, 20],
+            ],
+          },
+          "heatmap-opacity": {
+            default: 1,
+            stops: [
+              [14, 1],
+              [15, 0],
+            ],
+          },
+        },
+      },
+      "waterway-label"
+    );
+
+    map.addLayer(
+      {
+        id: "bins-point",
+        type: "circle",
+        source: "bins",
+        minzoom: 14,
+        paint: {
+          "circle-radius": {
+            property: "dbh",
+            type: "exponential",
+            stops: [
+              [{ zoom: 15, value: 1 }, 5],
+              [{ zoom: 15, value: 62 }, 10],
+              [{ zoom: 22, value: 1 }, 20],
+              [{ zoom: 22, value: 62 }, 50],
+            ],
+          },
+          "circle-color": {
+            property: "dbh",
+            type: "exponential",
+            stops: [
+              [0, "rgba(236,222,239,0)"],
+              [10, "rgb(236,222,239)"],
+              [20, "rgb(208,209,230)"],
+              [30, "rgb(166,189,219)"],
+              [40, "rgb(103,169,207)"],
+              [50, "rgb(28,144,153)"],
+              [60, "rgb(1,108,89)"],
+            ],
+          },
+          "circle-stroke-color": "white",
+          "circle-stroke-width": 1,
+          "circle-opacity": {
+            stops: [
+              [14, 0],
+              [15, 1],
+            ],
+          },
+        },
+      },
+      "waterway-label"
+    );
+
+    document
+      .querySelector(".bin-radius")
+      .addEventListener("change", async (event) => {
+        r = event.target.value;
+        const arrays = await getBins(updateSource);
+        map.getSource("bins").setData(arrays[0]);
+        map.getSource("problems").setData(arrays[1]);
+      });
+
+    const updateSource = setInterval(async () => {
+      const arrays = await getBins(updateSource);
+      map.getSource("bins").setData(arrays[0]);
+      map.getSource("problems").setData(arrays[1]);
+    }, 1000);
+
+    async function getBins(updateSource) {
+      try {
+        fetchUrl =
+          "/bins_in_radius?long=" +
+          userLong +
+          "&lat=" +
+          userLat +
+          "&radius=" +
+          r;
+        const response = await fetch(fetchUrl);
+        const data = await response.json();
+        let geojson = {
+          type: "FeatureCollection",
+          features: [],
+        };
+        let problems = {
+          type: "FeatureCollection",
+          features: [],
+        };
+        data.forEach((element) => {
+          if (element.fill_level <= 0.6) {
+            binColor = "green";
+          } else if (element.fill_level <= 0.8) {
+            binColor = "orange";
+          } else {
+            binColor = "red";
+          }
+
+          if (element.battery <= 0.25) {
+            needCharge = true;
+          } else {
+            needCharge = false;
+          }
+
+          if (
+            element.battery <= 0.25 ||
+            element.fire_status ||
+            element.fall_status
+          ) {
+            if (document.getElementById(element.sensor_id)) {
+              document
+                .getElementById(element.sensor_id)
+                .setAttribute("style", "background-color:lightcoral");
+
+              if (needCharge) {
+                document
+                  .getElementById(element.sensor_id + "-batt")
+                  .setAttribute("class", "fw-bold text-light bg-danger");
+              }
+              if (element.fire_status) {
+                document
+                  .getElementById(element.sensor_id + "-fire")
+                  .setAttribute("class", "fw-bold text-light bg-danger");
+              }
+              if (element.fall_status) {
+                document
+                  .getElementById(element.sensor_id + "-fall")
+                  .setAttribute("class", "fw-bold text-light bg-danger");
+              }
+            }
+
+            problems.features.push({
+              type: "Feature",
+              geometry: {
+                type: "Point",
+                coordinates: [element.long, element.lat],
+              },
+              properties: {
+                color: binColor,
+                sensor_id: element.sensor_id,
+                fill_level: element.fill_level,
+                battery: element.battery,
+                fall_status: element.fall_status,
+                fire_status: element.fire_status,
+                needCharge: needCharge,
+              },
+            });
+          }
+          geojson.features.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [element.long, element.lat],
+            },
+            properties: {
+              color: binColor,
+              sensor_id: element.sensor_id,
+              fill_level: element.fill_level,
+              battery: element.battery,
+              fall_status: element.fall_status,
+              fire_status: element.fire_status,
+              needCharge: needCharge,
+            },
+          });
+        });
+        return [geojson, problems];
+      } catch (err) {
+        if (updateSource) clearInterval(updateSource);
+        throw new Error(err);
+      }
+    }
+  }
+  map.on("mouseenter", "bins", () => {
+    map.getCanvas().style.cursor = "pointer";
+  });
+  map.on("mouseleave", "bins", () => {
+    map.getCanvas().style.cursor = "";
+  });
+  map.on("click", "bins", (e) => {
+    const coordinates = e.features[0].geometry.coordinates.slice();
+    const latitude = coordinates[1].toFixed(6);
+    const longitude = coordinates[0].toFixed(6);
+    const sensor_id = e.features[0].properties.sensor_id;
+    const fill_level = e.features[0].properties.fill_level * 100;
+    const battery = e.features[0].properties.battery * 100;
+    const fall_status = e.features[0].properties.fall_status;
+    const fire_status = e.features[0].properties.fire_status;
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
+    let popupHTML = `<strong>Bin ID: ${sensor_id}</strong><br>Latitude: ${latitude}<br>Longitude: ${longitude}<br>Fill Level: ${fill_level.toFixed(
+      1
+    )}%<br>Battery: ${battery.toFixed(1)}%<br><hr>`;
+    let errors = false;
+    if (battery <= 25) {
+      popupHTML += `🔋 This bin is low on battery! <br>`;
+      errors = true;
+    }
+    if (fire_status) {
+      popupHTML += `🔥 This bin is on fire! Call 911!<br>`;
+      errors = true;
+    }
+    if (fall_status) {
+      popupHTML += `🚯 This bin is tipped over!<br>`;
+      errors = true;
+    }
+    new mapboxgl.Popup().setLngLat(coordinates).setHTML(popupHTML).addTo(map);
+  });
+  // flyToCoords()
+  function flyToCoords(long, lat) {
+    map.flyTo({
+      center: [parseFloat(long), parseFloat(lat)],
+      essential: true,
+      zoom: 18,
+    });
+  }
+</script>
 
 {% endblock %}

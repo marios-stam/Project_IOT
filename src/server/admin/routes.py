@@ -6,7 +6,8 @@ from flask_login import current_user, login_required
 from werkzeug.security import generate_password_hash
 
 from .. import db
-from ..models import Report, User
+from ..constants import consts
+from ..models import Bin, Report, User
 from .forms import DriverForm
 
 admin_blueprint = Blueprint('admin_blueprint', __name__, url_prefix='/admin')
@@ -78,7 +79,16 @@ def delete(id):
 def bins():
     if User.query.get(current_user.id).role != 'manager':
         abort(403)
-    return render_template('admin/bins.html')
+    
+    ROWS = 25
+    if (request.args.get('page') is None):
+        page = 1
+    else:
+        page = request.args.get('page', 1, type=int)
+
+    bins = Bin.query.paginate(page=page, per_page=ROWS)
+    bins_num = Bin.query.count()
+    return render_template('admin/bins.html', bins_num=bins_num, bins=bins)
 
 
 @admin_blueprint.route('/reports')
@@ -86,7 +96,8 @@ def bins():
 def reports():
     if User.query.get(current_user.id).role != 'manager':
         abort(403)
-    reports = Report.query.filter_by(status='unconfirmed').order_by(Report.updated).all()
+    reports = Report.query.filter_by(
+        status='unconfirmed').order_by(Report.updated).all()
     rpt_num = len(reports)
     users = []
     for r in reports:
@@ -102,7 +113,7 @@ def confirm(id):
     report = Report.query.get(id)
     user = User.query.get(report.user_id)
     report.status = 'confirmed'
-    user.points = user.points + 5
+    user.points = user.points + consts['REPORT_POINTS']
     db.session.commit()
     return redirect(url_for('admin_blueprint.reports'))
 
@@ -115,6 +126,6 @@ def reject(id):
     report = Report.query.get(id)
     user = User.query.get(report.user_id)
     report.status = 'rejected'
-    user.points = user.points - 5
+    user.points = user.points - consts['REPORT_POINTS']
     db.session.commit()
     return redirect(url_for('admin_blueprint.reports'))

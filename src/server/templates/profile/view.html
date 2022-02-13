@@ -25,7 +25,7 @@ head %} {% endblock %} {% block content %}
       </tr>
       <tr>
         <th scope="row">Created At</th>
-        <td>{{ current_user.created.strftime("%m/%d/%Y, %H:%M:%S") }}</td>
+        <td>{{ current_user.created.strftime("%d/%m/%Y, %H:%M:%S") }}</td>
       </tr>
     </tbody>
   </table>

@@ -13,16 +13,17 @@ const map = new mapboxgl.Map({
   zoom: 17,
 });
 
-var directions = new MapboxDirections({
-  accessToken: mapboxgl.accessToken,
-  unit: "metric",
-  profile: "mapbox/walking",
-  interactive: false,
+map.addControl(new mapboxgl.NavigationControl());
+const geolocate = new mapboxgl.GeolocateControl({
+  positionOptions: {
+    enableHighAccuracy: true,
+  },
+  trackUserLocation: true,
 });
-map.addControl(directions);
+map.addControl(geolocate);
+
 
 // Add zoom and rotation controls to the map
-map.addControl(new mapboxgl.NavigationControl());
 
 // Add custom control for bin radius to the map
 class BinRadiusControl {
@@ -57,14 +58,15 @@ class BountiesControl {
 }
 map.addControl(new BountiesControl(), "top-left");
 
-// Geolocation
-const geolocate = new mapboxgl.GeolocateControl({
-  positionOptions: {
-    enableHighAccuracy: true,
-  },
-  trackUserLocation: true,
+var directions = new MapboxDirections({
+  accessToken: mapboxgl.accessToken,
+  unit: "metric",
+  profile: "mapbox/walking",
+  interactive: false,
+  zoom: 14,
 });
-map.addControl(geolocate);
+map.addControl(directions, 'top-left');
+
 map.on("load", () => {
   geolocate.trigger();
 });
@@ -163,7 +165,7 @@ async function drawBins() {
     const arrays = await getBins(updateSource);
     map.getSource("bins").setData(arrays[0]);
     map.getSource("problems").setData(arrays[1]);
-  }, 1000000);
+  }, 1000);
 
   async function getBins(updateSource) {
     try {
@@ -187,13 +189,16 @@ async function drawBins() {
         } else {
           binColor = "red";
         }
-        needCharge = false;
+        if (element.battery <= 0.25) {
+          needCharge = true;
+        } else {
+          needCharge = false;
+        }
         if (
           element.battery <= 0.25 ||
           element.fire_status ||
           element.fall_status
         ) {
-          needCharge = true;
           problems.features.push({
             type: "Feature",
             geometry: {
@@ -310,7 +315,7 @@ async function getBounties() {
           ("0" + left.getUTCMinutes()).slice(-2) +
           ":" +
           ("0" + left.getUTCSeconds()).slice(-2);
-        mybounties += `<p class="bg-success"><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button onclick="getDirections('${element.bin_id}')">Get Directions</button> <em>Reward: ${element.points} pts</em></p><p>Time left: ${timeLeft}</p><hr>`;
+        mybounties += `<div class="p-2" style="background-color:lightgreen"><p><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button onclick="getDirections('${element.bin_id}')">Get Directions</button> <em>Reward: ${element.points} pts</em></p><p>Time left: ${timeLeft}</p></div><hr>`;
       }
       if (element.assigned_usr_id == null) {
         otherbounties += `<p><strong>${element.message}</strong><br>Bin ID: ${element.bin_id}<br>Added At: ${element.timestamp}<br></p><p><button onclick=assumeBounty(${element.id})>Take over the handling</button> <em>Reward: ${element.points} pts</em></p><hr>`;
@@ -324,6 +329,7 @@ async function getBounties() {
 setInterval(getBounties, 2000);
 
 async function getDirections(binId) {
+  document.getElementsByClassName("mapboxgl-popup")[0].remove();
   directions.removeRoutes();
   const response = await fetch(fetchUrl);
   const data = await response.json();

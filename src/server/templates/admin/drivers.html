@@ -70,7 +70,7 @@ head %} {% endblock %} {% block content %}
             <th scope="row">{{ d.id }}</th>
             <td>{{ d.username }}</td>
             <td>{{ d.email }}</td>
-            <td>{{ d.created.strftime("%m/%d/%Y, %H:%M:%S") }}</td>
+            <td>{{ d.created.strftime("%d/%m/%Y, %H:%M:%S") }}</td>
             <td>
               <button
                 type="button"

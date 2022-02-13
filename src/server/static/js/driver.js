@@ -138,13 +138,16 @@ async function drawBins() {
         } else {
           binColor = "red";
         }
-        needCharge = false;
+        if (element.battery <= 0.25) {
+          needCharge = true;
+        } else {
+          needCharge = false;
+        }
         if (
           element.battery <= 0.25 ||
           element.fire_status ||
           element.fall_status
         ) {
-          needCharge = true;
           problems.features.push({
             type: "Feature",
             geometry: {

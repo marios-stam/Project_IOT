@@ -14,15 +14,21 @@ head %}
 <div class="container my-4" style="max-width: 440px">
   <div class="list-group">
     {% for r in reports %}
-    <div class="list-group-item list-group-item-action">
+    {% if r.status == 'rejected' %}
+    <div class="list-group-item list-group-item-action" style="background-color:lightcoral;">
+    {% elif r.status == 'confirmed' %}
+    <div class="list-group-item list-group-item-action" style="background-color:lightgreen">
+    {% else %}
+    <div class="list-group-item list-group-item-action"></div>
+    {% endif %}
       <div class="d-flex w-100 justify-content-between">
         <h5 class="mb-1">Report ID: {{ r.report_id }}</h5>
-        <small id="time-left" class="text-muted"
-          >{{ r.updated.strftime("%m/%d/%Y, %H:%M") }}</small
+        <small id="time-left" 
+          >{{ r.updated.strftime("%d/%m/%Y, %H:%M") }}</small
         >
       </div>
-      <p class="mb-1">{{ r.details }}</p>
-      <small class="text-muted"
+      <p class="mb-3">{{ r.details }}</p>
+      <small 
         >Current status: <strong>{{ r.status }}</strong></small
       >
     </div>

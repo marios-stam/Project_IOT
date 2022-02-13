@@ -78,7 +78,7 @@
 
     <!-- Navbar 2 -->
     <nav
-      class="navbar navbar-expand-sm navbar-dark bg-dark mb-3 border-3 border-bottom"
+      class="navbar navbar-expand-sm navbar-dark bg-dark mb-3 border-3 border-bottom sticky-top"
     >
       <div class="container">
         <button
@@ -134,9 +134,9 @@
         </div>
       </div>
     </nav>
-
+    {% block map %}{% endblock %}
     <!-- Container -->
-    <div class="container text-center d-flex justify-content-center">
+    <div class="container-fluid text-center d-flex justify-content-center">
       <!-- Content -->
       {% block content %}{% endblock %}
     </div>

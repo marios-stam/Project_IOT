@@ -56,7 +56,7 @@ head %} {% endblock %} {% block content %}
         >
           <div class="mx-auto">
             <div class="fw-bold">{{ u.username }}</div>
-            {{ u.created.strftime("%m/%d/%Y, %H:%M") }}
+            {{ u.created.strftime("%d/%m/%Y, %H:%M") }}
           </div>
         </li>
         {% endfor %}

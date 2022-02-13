@@ -22,7 +22,7 @@ head %}
       <div class="d-flex w-100 justify-content-between">
         <h5 class="mb-1">Bounty ID: {{ b.id }}</h5>
         <small id="time-left" class="text-muted"
-          >{{ b.time_assigned.strftime("%m/%d/%Y, %H:%M") }}</small
+          >{{ b.time_assigned.strftime("%d/%m/%Y, %H:%M") }}</small
         >
       </div>
       <p class="mb-1">{{ b.message }}</p>
