@@ -2,38 +2,14 @@
 head %} {% endblock %} {% block content %}
 
 <div class="container">
-    <p class="h3">Leaderboard</p>
+  <p class="h3">Leaderboard</p>
   <div class="row mb-5">
     <div class="col d-flex justify-content-center">
-      <ul class="list-group list-group-numbered w-100  border border-dark" style="max-width: 440px">
-        <li
-          class="list-group-item d-flex justify-content-between align-items-center"
-          style="background-color: #ffd700"
-        >
-          <div class="fw-bold">{{ top3[0].username }}</div>
-          <span class="badge bg-primary rounded-pill" style="width: 44px"
-            >{{ top3[0].points }}</span
-          >
-        </li>
-        <li
-          class="list-group-item d-flex justify-content-between align-items-center"
-          style="background-color: #c0c0c0"
-        >
-          <div class="fw-bold">{{ top3[1].username }}</div>
-          <span class="badge bg-primary rounded-pill" style="width: 44px"
-            >{{ top3[1].points }}</span
-          >
-        </li>
-        <li
-          class="list-group-item d-flex justify-content-between align-items-center"
-          style="background-color: #cd7f32"
-        >
-          <div class="fw-bold">{{ top3[2].username }}</div>
-          <span class="badge bg-primary rounded-pill" style="width: 44px"
-            >{{ top3[2].points }}</span
-          >
-        </li>
-        {% for u in rest %}
+      <ul
+        class="list-group list-group w-100 border border-dark"
+        style="max-width: 440px"
+      >
+        {% for u in leaderboard.items %}
         <li
           class="list-group-item d-flex justify-content-between align-items-center"
         >
@@ -45,12 +21,26 @@ head %} {% endblock %} {% block content %}
         {% endfor %}
       </ul>
     </div>
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center my-3">
+        {% for page in leaderboard.iter_pages() %} {% if page %} {% if page !=
+        leaderboard.page %}
+        <li class="page-item">
+          <a class="page-link" href="citizens?lpage={{page}}">{{ page }}</a>
+        </li>
+        {% else %}
+        <li class="page-item active" aria-current="page">
+          <a class="page-link">{{ page }}</a>
+        </li>
+        {% endif %} {% endif %} {% endfor %}
+      </ul>
+    </nav>
   </div>
   <p class="h3">Active users (last 30 days): {{ active_num }}</p>
   <div class="row">
     <div class="col d-flex justify-content-center">
       <ul class="list-group w-100 border border-dark" style="max-width: 440px">
-        {% for u in active %}
+        {% for u in active.items %}
         <li
           class="list-group-item d-flex justify-content-between align-items-center"
         >
@@ -62,6 +52,20 @@ head %} {% endblock %} {% block content %}
         {% endfor %}
       </ul>
     </div>
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center my-3">
+        {% for page in active.iter_pages() %} {% if page %} {% if page !=
+        active.page %}
+        <li class="page-item">
+          <a class="page-link" href="citizens?apage={{page}}">{{ page }}</a>
+        </li>
+        {% else %}
+        <li class="page-item active" aria-current="page">
+          <a class="page-link">{{ page }}</a>
+        </li>
+        {% endif %} {% endif %} {% endfor %}
+      </ul>
+    </nav>
   </div>
 </div>
 {% endblock %}

@@ -29,7 +29,7 @@ head %}
             <th scope="col">Fall Status</th>
             <th scope="col">Fire Status</th>
             <th scope="col">Temperature</th>
-            <th scope="col">Timestamp</th>
+            <th scope="col">Latest Info At</th>
             <th scope="col">Time Online</th>
             <th scope="col">Orientation</th>
             <th scope="col">Action</th>
@@ -61,12 +61,15 @@ head %}
             </td>
             <td>{{ "%.1f"|format(b.temperature) }} ℃</td>
             <td>{{ b.timestamp[:-4] }}</td>
-            <td>{{ b.time_online }}</td>
+            <td>{{ b.time_online|timed }}</td>
             <td>{{ b.orientation }}</td>
             <td>
-              <button type="button" class="btn btn-primary btn-sm w-100">
-                Show Chart
-              </button>
+              <a
+                class="btn btn-primary btn-sm"
+                href="/admin/bins/{{b.sensor_id}}"
+                role="button"
+                >Show History</a
+              >
             </td>
           </tr>
           {% endfor %}
@@ -94,7 +97,7 @@ head %}
 <script>
   userLong = 21.735;
   userLat = 38.246;
-  r = 1;
+  // r = 1;
   mapboxgl.accessToken =
     "pk.eyJ1IjoicXdlcnRxd2VydCIsImEiOiJja3o5em84aHEwMWFuMnZwZjlyNmRjOG16In0.LQhfH1fxUa4Vds54POk2Xw";
   const map = new mapboxgl.Map({
@@ -104,7 +107,7 @@ head %}
     zoom: 15,
   });
   map.addControl(new mapboxgl.NavigationControl());
-  class BinRadiusControl {
+  /* class BinRadiusControl {
     onAdd(map) {
       this._map = map;
       this._container = document.createElement("div");
@@ -118,7 +121,7 @@ head %}
       this._map = undefined;
     }
   }
-  map.addControl(new BinRadiusControl(), "top-left");
+  map.addControl(new BinRadiusControl(), "top-left"); */
   map.on("load", () => {
     drawBins();
   });
@@ -273,14 +276,14 @@ head %}
       "waterway-label"
     );
 
-    document
+    /* document
       .querySelector(".bin-radius")
       .addEventListener("change", async (event) => {
         r = event.target.value;
         const arrays = await getBins(updateSource);
         map.getSource("bins").setData(arrays[0]);
         map.getSource("problems").setData(arrays[1]);
-      });
+      }); */
 
     const updateSource = setInterval(async () => {
       const arrays = await getBins(updateSource);
@@ -290,13 +293,7 @@ head %}
 
     async function getBins(updateSource) {
       try {
-        fetchUrl =
-          "/bins_in_radius?long=" +
-          userLong +
-          "&lat=" +
-          userLat +
-          "&radius=" +
-          r;
+        fetchUrl = "/bins/get_all";
         const response = await fetch(fetchUrl);
         const data = await response.json();
         let geojson = {
@@ -424,6 +421,10 @@ head %}
       popupHTML += `🚯 This bin is tipped over!<br>`;
       errors = true;
     }
+    if (errors) {
+      popupHTML += `<hr>`;
+    }
+    popupHTML += `<div class="row d-flex justify-content-evenly"><a class="col-10 btn btn-primary btn-sm" href="/admin/bins/${e.features[0].properties.sensor_id}" role="button">Show History</a></div>`;
     new mapboxgl.Popup().setLngLat(coordinates).setHTML(popupHTML).addTo(map);
   });
   // flyToCoords()

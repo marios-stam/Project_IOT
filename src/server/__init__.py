@@ -75,6 +75,12 @@ def init_app(config_class=Config):
 
         '''End of Flask-Login configuration'''
 
+        from datetime import timedelta
+
+        @app.template_filter('timed')
+        def timed(s):
+            return timedelta(seconds=s)
+
         # Custom Error Pages
         app.register_error_handler(403, forbidden)
         app.register_error_handler(404, page_not_found)

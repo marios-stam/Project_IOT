@@ -12,6 +12,8 @@ from .forms import DriverForm
 
 admin_blueprint = Blueprint('admin_blueprint', __name__, url_prefix='/admin')
 
+ROWS = 20
+
 
 @admin_blueprint.route('/')
 @login_required
@@ -26,15 +28,21 @@ def index():
 def citizens():
     if User.query.get(current_user.id).role != 'manager':
         abort(403)
+    if (request.args.get('lpage') is None):
+        lpage = 1
+    else:
+        lpage = request.args.get('lpage', 1, type=int)
+    if (request.args.get('apage') is None):
+        apage = 1
+    else:
+        apage = request.args.get('apage', 1, type=int)
     threshold = datetime.now()-timedelta(days=30)
     active = User.query.filter_by(role='citizen').filter(
-        User.created > threshold).order_by(User.created.desc()).all()
+        User.created > threshold).order_by(User.created.desc()).paginate(page=apage, per_page=ROWS)
     leaderboard = User.query.filter_by(
-        role='citizen').order_by(User.points.desc()).all()
-    top3 = leaderboard[:3]
-    rest = leaderboard[3:]
-    active_num = len(active)
-    return render_template('admin/citizens.html', active=active, top3=top3, rest=rest, active_num=active_num)
+        role='citizen').order_by(User.points.desc()).paginate(page=lpage, per_page=ROWS)
+    active_num = active.total
+    return render_template('admin/citizens.html', active=active, leaderboard=leaderboard, active_num=active_num)
 
 
 @admin_blueprint.route('/drivers', methods=('GET', 'POST'))
@@ -55,10 +63,13 @@ def drivers():
 
         for error in form.errors.values():
             flash(error, category='danger')
-
+    if (request.args.get('page') is None):
+        page = 1
+    else:
+        page = request.args.get('page', 1, type=int)
     drivers = User.query.filter_by(
-        role='driver').order_by(User.created.desc()).all()
-    drivers_num = len(drivers)
+        role='driver').order_by(User.created.desc()).paginate(page=page, per_page=ROWS)
+    drivers_num = drivers.total
     return render_template('admin/drivers.html', form=form, drivers=drivers, drivers_num=drivers_num)
 
 
@@ -79,16 +90,29 @@ def delete(id):
 def bins():
     if User.query.get(current_user.id).role != 'manager':
         abort(403)
-    
-    ROWS = 25
+
     if (request.args.get('page') is None):
         page = 1
     else:
         page = request.args.get('page', 1, type=int)
 
-    bins = Bin.query.paginate(page=page, per_page=ROWS)
-    bins_num = Bin.query.count()
+    cte = (db.session.query(Bin.sensor_id, db.func.max(Bin.timestamp).label(
+        'max_time')).group_by(Bin.sensor_id).cte(name='cte'))
+    bins = db.session.query(Bin).join(cte, db.and_(Bin.sensor_id == cte.c.sensor_id,
+                                                   Bin.timestamp == cte.c.max_time)).paginate(page=page, per_page=ROWS)
+    bins_num = db.session.query(Bin).join(cte, db.and_(
+        Bin.sensor_id == cte.c.sensor_id, Bin.timestamp == cte.c.max_time)).count()
+
     return render_template('admin/bins.html', bins_num=bins_num, bins=bins)
+
+
+@admin_blueprint.route('/bins/<id>')
+@login_required
+def history(id):
+    if User.query.get(current_user.id).role != 'manager':
+        abort(403)
+
+    return render_template('admin/history.html')
 
 
 @admin_blueprint.route('/reports')
@@ -96,11 +120,15 @@ def bins():
 def reports():
     if User.query.get(current_user.id).role != 'manager':
         abort(403)
+    if (request.args.get('page') is None):
+        page = 1
+    else:
+        page = request.args.get('page', 1, type=int)
     reports = Report.query.filter_by(
-        status='unconfirmed').order_by(Report.updated).all()
-    rpt_num = len(reports)
+        status='unconfirmed').order_by(Report.updated).paginate(page=page, per_page=ROWS)
+    rpt_num = reports.total
     users = []
-    for r in reports:
+    for r in reports.items:
         users.append(User.query.get(r.user_id))
     return render_template('admin/reports.html', users=users, reports=reports, rpt_num=rpt_num)
 
