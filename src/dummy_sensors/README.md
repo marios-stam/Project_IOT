@@ -113,6 +113,9 @@ $ curl http://localhost:5000/measurement/0c8e145e-4cec-479e-8c3a-2129285e6db7/2
 ### /send_msg/<sensor_id>/<message>
 **POST** to sent a message or command to a sensor. Implemented commands are the following:
 - charge: set `battery = 1.0`
+- discharge: set `battery = BATTERY_CRITICAL + 0.01`
+- empty: set `fullness = 0.0`
+- fill: set `fullness = 1.0`
 - toggle_fire: set `fire_status = not fire_status`
 - toggle_fall: set `fall_status = not fall_status`
 - on_fire: set `fire_status = True`

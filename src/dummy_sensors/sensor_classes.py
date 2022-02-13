@@ -35,7 +35,7 @@ class Sensor:
 
     def update(self):
         # Set fill level
-        self.fullness += FILL_RATE * (1 + 0.2 * rand_perc(center=True))
+        self.fullness += FILL_RATE * (1 + 0.2 * rand_perc(center=True)) if rand_perc() > NO_TRASH_CHANCE else 0
         self.fullness = min(self.fullness, 1.0)
 
         # Set temperature
@@ -88,10 +88,13 @@ class Sensor:
             print(__name__, "Server unreachable")
 
     def loop(self, pipe):
-        self.fullness = rand_perc()
+        if STARTS_AT_ZERO:
+            self.fullness = 0.0
+        else:
+            self.fullness = rand_perc()
 
         while True:
-            if diff_time(self.prev_time, datetime.now()) > INTERVAL:
+            if diff_time(self.prev_time, datetime.now()) > INTERVAL and self.battery > BATTERY_CRITICAL:
                 self.update()
 
             if pipe.poll(INTERVAL * 0.1):
@@ -128,6 +131,13 @@ class Sensor:
 
                 if cmd == 'charge':
                     self.battery = 1.0
+                if cmd == 'discharge':
+                    self.battery = BATTERY_CRITICAL + 0.05
+
+                if cmd == 'empty':
+                    self.fullness = 0.0
+                if cmd == 'fill':
+                    self.fullness = 1.0
 
                 pipe.send(self.history[-1:][::-1])
 
