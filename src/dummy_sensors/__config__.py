@@ -1,7 +1,7 @@
 SERVER_IP = 'http://localhost:5000/'
 
 # =========== CONSTANTS ===========
-ARRAY_SIZE = 5                              # Number of bins in infrastructure
+ARRAY_SIZE = 30                             # Number of bins in infrastructure
 CENTER_POS = {
     'x': 38.288082942215645,
     'y': 21.786401980994090
