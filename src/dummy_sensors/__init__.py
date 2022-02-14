@@ -2,21 +2,29 @@ from flask import Flask
 from flask_restful import Api
 from flask_restful import Resource, abort
 from .__config__ import SERVER_IP
-from .sensor_classes import SensorGateway
+from .gateway import SensorGateway
+import os
 
 
 # =========== FLASK ===========
-app = Flask(__name__)
-api = Api(app)
+class App(Flask):
+    def __init__(self, *args, **kwargs):
+        print("FLASK TEST", os.getpid())
+        super().__init__(*args, **kwargs)
+        self.gateway = SensorGateway(server=SERVER_IP)
 
-# Creating gateway
-gateway = SensorGateway(server=SERVER_IP)
+    def run(self, *args, **kwargs):
+        self.gateway.start_processes()
+        super().run(*args, **kwargs)
+
+app = App(__name__)
+api = Api(app)
 
 # =========== RESOURCE CLASSES ===========
 class Sensors(Resource):
     def get(self, sensor_id=None):
-        if sensor_id in gateway.get_sensor_IDs():
-            return gateway.get_sensor_details(sensor_id), 200
+        if sensor_id in app.gateway.get_sensor_IDs():
+            return app.gateway.get_sensor_details(sensor_id), 200
         elif sensor_id is None:
             abort(400, message="No ID provided")
         else:
@@ -29,7 +37,7 @@ class Sensors(Resource):
         abort(501, message="Not implemented yet")
 
     def delete(self, sensor_id=None):
-        if sensor_id in gateway.get_sensor_IDs():
+        if sensor_id in app.gateway.get_sensor_IDs():
             abort(501, message="Not implemented yet")
         elif sensor_id is None:
             abort(400, message="No ID provided")
@@ -39,15 +47,15 @@ class Sensors(Resource):
 
 class Measurements(Resource):
     def get(self, sensor_id, count=1):
-        if sensor_id in gateway.get_sensor_IDs():
-            return gateway.get_last_measurements(sensor_id, count), 200
+        if sensor_id in app.gateway.get_sensor_IDs():
+            return app.gateway.get_last_measurements(sensor_id, count), 200
         else:
             abort(404, message="Sensor with ID {} doesn't exist".format(sensor_id))
 
 
 class AllSensors(Resource):
     def get(self):
-        return gateway.get_sensor_IDs(), 200
+        return app.gateway.get_sensor_IDs(), 200
 
 
 class Kill(Resource):
@@ -56,8 +64,8 @@ class Kill(Resource):
 
 class SensorSendMessage(Resource):
     def post(self, sensor_id, msg):
-        if sensor_id in gateway.get_sensor_IDs():
-            return gateway.send_msg(sensor_id, msg), 200
+        if sensor_id in app.gateway.get_sensor_IDs():
+            return app.gateway.send_msg(sensor_id, msg), 200
         elif sensor_id is None or msg is None:
             abort(400, message="No ID or Message provided")
         else:
@@ -73,4 +81,4 @@ def init_app():
     api.add_resource(AllSensors, '/sensor_list')
     api.add_resource(SensorSendMessage, '/send_msg/<string:sensor_id>/<string:msg>')
 
-    return app, gateway
+    return app 
