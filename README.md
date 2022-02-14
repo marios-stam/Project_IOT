@@ -8,6 +8,10 @@ Team 4
 
 Waste Management & Citizen Engagement
 
+## 
+You can find the Poerpoint presentation of the project at **Powerpoints/Final Presentation/Waste-management-Final.pptx**
+
+The manual of the platform is the file **Waste-Management-Manual.pdf**
 ## Preperation
 
 ### Install dependencies : 
