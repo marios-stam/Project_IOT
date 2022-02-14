@@ -26,7 +26,6 @@ def fleet_route_optimising(trucks, bins_to_collect):
         print("wps length:", len(wps))
 
         route_with_wps = calculate_route_from_waypoints(start, wps)
-        print("mlkia route_with_wps:", route_with_wps)
 
         route_coords = route_with_wps["routes"][0]["geometry"]["coordinates"]
 
