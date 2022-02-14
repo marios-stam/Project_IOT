@@ -118,10 +118,12 @@ async function drawBins() {
 
   async function getBins(updateSource) {
     try {
+      r = 15;
       fetchUrl =
-        "/bins_in_radius?long=" + userLong + "&lat=" + userLat + "&radius=5";
+        "/bins_in_radius?long=" + userLong + "&lat=" + userLat + "&radius=" + r;
       const response = await fetch(fetchUrl);
       const data = await response.json();
+      console.log("data:", data);
       let geojson = {
         type: "FeatureCollection",
         features: [],
@@ -148,6 +150,7 @@ async function drawBins() {
           element.fire_status ||
           element.fall_status
         ) {
+          console.log("kek");
           problems.features.push({
             type: "Feature",
             geometry: {
@@ -232,22 +235,27 @@ map.on("click", "bins", (e) => {
 });
 
 async function getRoute() {
-  // const truck_id = document.querySelector('meta[name="driver_name"]').content;
-  // const query2 = await fetch("/trucks/fleet_routing");
-  // const json2 = await query2.json();
-  // console.log(json2);
-  // let truck;
-  // json2.forEach((element) => {
-  //   if (element.truck_id == truck_id) {
-  //     truck = element;
-  //   }
-  // });
-
-  // const data2 = truck.route_coords;
+  const truck_id = document.querySelector('meta[name="driver_name"]').content;
   const query2 = await fetch("/trucks/fleet_routing");
   const json2 = await query2.json();
   console.log(json2);
-  const data2 = json2[0].route_coords;
+  let truck;
+  json2.forEach((element) => {
+    if (element.truck_id == truck_id) {
+      truck = element;
+    }
+  });
+  console.log(truck)
+  if (truck == undefined) {
+    alert("You have no routes for now");
+  }
+  const data2 = truck.route_coords;
+
+  // const query2 = await fetch("/trucks/fleet_routing");
+  // console.log(query2);
+  // const json2 = await query2.json();
+  // console.log(json2);
+  // const data2 = json2[0].route_coords;
   console.log(data2);
   const geojson = {
     type: "Feature",
