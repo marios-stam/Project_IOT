@@ -1,5 +1,5 @@
-var userLong = 21.7351380233992;
-var userLat = 38.2462665965041;
+var userLong = 21.788902924716314;
+var userLat = 38.288462135795776;
 const start = [userLong, userLat];
 
 mapboxgl.accessToken =
@@ -11,8 +11,6 @@ const map = new mapboxgl.Map({
   center: start,
   zoom: 17,
 });
-
-const marker = new mapboxgl.Marker().setLngLat(start).addTo(map);
 
 // Add custom control for bin radius to the map
 class TruckFullnessControl {
@@ -133,9 +131,9 @@ async function drawBins() {
         features: [],
       };
       data.forEach((element) => {
-        if (element.fill_level <= 60) {
+        if (element.fill_level <= 0.6) {
           binColor = "green";
-        } else if (element.fill_level <= 80) {
+        } else if (element.fill_level <= 0.8) {
           binColor = "orange";
         } else {
           binColor = "red";
@@ -245,7 +243,7 @@ async function getRoute() {
       truck = element;
     }
   });
-  console.log(truck)
+  console.log(truck);
   if (truck == undefined) {
     alert("You have no routes for now");
   }
@@ -328,6 +326,11 @@ async function getRoute() {
       },
     });
   }
+
+  const marker = new mapboxgl.Marker().setLngLat(data2[0]).addTo(map);
+  map.flyTo({
+    center: data2[0],
+  });
 
   const instructions = document.getElementById("kek");
   const steps = json2[0].steps;
