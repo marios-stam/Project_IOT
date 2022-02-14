@@ -3,12 +3,13 @@ from uuid import uuid4
 from multiprocessing import Pipe
 from .__config__ import *
 from .sensor import Sensor
+import os
 
 class SensorGateway:
     RUNNING = False
 
     def __init__(self, server):
-        print("Creating SensorGateway", os.getpid())
+        # print("Creating SensorGateway", os.getpid())
 
         self.history = []
         self.sensors = {}
@@ -21,10 +22,17 @@ class SensorGateway:
             self.pipes[tmp_id] = parent
 
     def start_processes(self):
+        # with open(os.path.join(os.getcwd(), 'dummy_sensors/wtf' ), 'r') as f:
+        #     for l in f.readlines():
+        #         if l != '0': return
+
         if SensorGateway.RUNNING:
             return
 
-        print("Running SensorGateway", os.getpid())
+        # with open(os.path.join(os.getcwd(), 'dummy_sensors/wtf' ), 'w') as f:
+        #     f.write('1')
+            
+        # print("Running SensorGateway", os.getpid())
         SensorGateway.RUNNING = True
         for sensor in self.sensors:
             self.sensors[sensor].process.start()
