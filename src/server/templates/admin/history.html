@@ -1,59 +1,283 @@
 {% extends "admin/base.html" %} {% block title %}History{% endblock %} {% block
 head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
-{% endblock %} {% block map %}
-<canvas
-  id="myChart"
-  width="400"
-  height="400"
-  style="width: 400px; height: 400px"
-></canvas>
-{% endblock %} {% block content %}
+{% endblock %} {% block map %} {% endblock %} {% block content %}
 
 <div class="container-fluid">
-  <div class="row mb-5">
-    <div class="col d-flex justify-content-center"></div>
+  <div class="btn-group" role="group">
+    <button
+      onclick="getFill(false)"
+      type="button"
+      class="btn btn-outline-primary"
+    >
+      Fill Level
+    </button>
+    <button onclick="getTemp()" type="button" class="btn btn-outline-primary">
+      Temperature
+    </button>
+    <button onclick="getBatt()" type="button" class="btn btn-outline-primary">
+      Battery Level
+    </button>
   </div>
-  <p class="h3">Total number of bins: ({{bins_num}})</p>
-  <div class="row"></div>
+
+  <div class="row mb-5">
+    <div class="col d-flex justify-content-center">
+      <canvas id="myChart" style="max-height: 440px"></canvas>
+    </div>
+  </div>
+  <p class="h3">Total number of measurements: {{result_num}}</p>
+  <div class="row justify-content-center">
+    <form method="GET" class="d-flex justify-content-center my-3">
+      <label class="form-label my-auto" for="n"
+        >Number of latest measurements to show:</label
+      >
+      <input
+        style="max-width: 220px"
+        class="mx-2 form-control"
+        id="n"
+        type="number"
+        name="n"
+        min="2"
+        max="{{n}}"
+        required
+      />
+      <input class="btn btn-secondary" type="submit" />
+    </form>
+    <div class="card my-4 border border-dark" style="max-width: 440px">
+      <div class="card-header">Information about this bin</div>
+      <div class="card-body">
+        <h5 class="card-title">Sensor ID:<br />{{ result[0].sensor_id }}</h5>
+        <p class="card-text">
+          Position (Lat., Long.): ({{ "%.5f"|format(result[0].lat) }}, {{
+          "%.5f"|format(result[0].long) }})<br />
+          Time Online: {{ result[0].time_online|timed }}<br />
+        </p>
+        <div class="py-3">Estimated Time to Fill: <strong id="etf"></strong></div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table
+        class="table table-hover table-bordered border border-dark align-middle"
+      >
+        <thead class="table-dark">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Timestamp</th>
+            <th scope="col">Fill Level</th>
+            <th scope="col">Battery Level</th>
+            <th scope="col">Fall Status</th>
+            <th scope="col">Fire Status</th>
+            <th scope="col">Temperature</th>
+            <th scope="col">Orientation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in result %}
+          <tr>
+            <th scope="row">{{loop.index}}</th>
+            <td>{{ r.timestamp[:-4] }}</td>
+
+            <td>{{ "%.1f"|format(r.fill_level*100) }} %</td>
+            <td id="{{ r.sensor_id }}-batt">
+              {{ "%.1f"|format(r.battery*100) }} %
+            </td>
+            <td id="{{ r.sensor_id }}-fall">
+              {% if r.fall_status %}{{ r.fall_status }}{% endif %}
+            </td>
+            <td id="{{ r.sensor_id }}-fire">
+              {% if r.fire_status %}{{ r.fire_status }}{% endif %}
+            </td>
+            <td>{{ "%.1f"|format(r.temperature) }} ℃</td>
+            <td>{{ r.orientation }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
+<span id="id" hidden>{{id}}</span>
+<span id="kek" hidden>{{n}}</span>
 <script>
-  const ctx = document.getElementById("myChart").getContext("2d");
-  const myChart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+  let myLabels, myData, data, config, myChart, myData2;
+
+  getFill(true);
+
+  function etf(seconds) {
+    seconds = Number(seconds);
+    var d = Math.floor(seconds / (3600 * 24));
+    var h = Math.floor((seconds % (3600 * 24)) / 3600);
+    var m = Math.floor((seconds % 3600) / 60);
+    var s = Math.floor(seconds % 60);
+
+    var dDisplay = d > 0 ? d + (d == 1 ? "d, " : "d, ") : "";
+    var hDisplay = h > 0 ? h + (h == 1 ? "hr, " : "h, ") : "";
+    var mDisplay = m > 0 ? m + (m == 1 ? "m, " : "m, ") : "";
+    var sDisplay = s > 0 ? s + (s == 1 ? "s" : "s") : "";
+    return dDisplay + hDisplay + mDisplay + sDisplay;
+  }
+
+  function secondsToDhms(seconds) {
+    seconds = Number(seconds);
+    var d = Math.floor(seconds / (3600 * 24));
+    var h = Math.floor((seconds % (3600 * 24)) / 3600);
+    var m = Math.floor((seconds % 3600) / 60);
+    var s = Math.floor(seconds % 60);
+
+    var dDisplay = d > 0 ? d + (d == 1 ? "d" : "d") : "";
+    var hDisplay = h > 0 ? h + (h == 1 ? "h" : "h") : "";
+    var mDisplay = m > 0 ? m + (m == 1 ? "m" : "m") : "";
+    var sDisplay = s > 0 ? s + (s == 1 ? "s" : "s") : "";
+
+    if (dDisplay) {
+      return dDisplay;
+    } else {
+      if (hDisplay) {
+        return hDisplay;
+      } else {
+        if (mDisplay) {
+          return mDisplay;
+        } else {
+          return sDisplay;
+        }
+      }
+    }
+  }
+
+  async function getFill(b) {
+    let id = document.getElementById("id").innerHTML;
+    let n = document.getElementById("kek").innerHTML;
+    const response = await fetch(`/bins_history?sensor_id=${id}&n=${n}`);
+    const json = await response.json();
+    myLabels = [];
+    myData = [];
+    myData2 = [];
+    json.forEach((el) => {
+      myLabels.unshift(el.time_online);
+      myData.unshift(el.fill_level);
+    });
+
+    const response2 = await fetch(`/regression/${id}`);
+    const json2 = await response2.json();
+    let secondsFromNow = (1 - json[0].fill_level) / json2.angle;
+    console.log(secondsFromNow);
+    document.getElementById("etf").innerHTML = etf(secondsFromNow);
+    let seconds = secondsFromNow + myLabels[myLabels.length - 1];
+    console.log(seconds);
+    console.log(myLabels, myData);
+    myLabels.push(seconds);
+    json.forEach((el) => {
+      myData2.push(null);
+    });
+    myLabels.forEach((element) => {
+      idx = myLabels.indexOf(element);
+      myLabels[idx] = element / 3600;
+    });
+    console.log(myLabels);
+    myData2.pop();
+    myData2.push(json[0].fill_level);
+    myData2.push(1);
+    console.log("(128, 0, 128)");
+    data = {
+      labels: myLabels,
       datasets: [
         {
-          label: "# of Votes",
-          data: [12, 19, 3, 5, 2, 3],
-          backgroundColor: [
-            "rgba(255, 99, 132, 0.2)",
-            "rgba(54, 162, 235, 0.2)",
-            "rgba(255, 206, 86, 0.2)",
-            "rgba(75, 192, 192, 0.2)",
-            "rgba(153, 102, 255, 0.2)",
-            "rgba(255, 159, 64, 0.2)",
-          ],
-          borderColor: [
-            "rgba(255, 99, 132, 1)",
-            "rgba(54, 162, 235, 1)",
-            "rgba(255, 206, 86, 1)",
-            "rgba(75, 192, 192, 1)",
-            "rgba(153, 102, 255, 1)",
-            "rgba(255, 159, 64, 1)",
-          ],
-          borderWidth: 1,
+          label: "Real Fill Level",
+          data: myData,
+          fill: false,
+          borderColor: "rgb(75, 192, 192)",
+          tension: 0.1,
+        },
+        {
+          label: "Fill Level Prediction",
+          data: myData2,
+          fill: false,
+          borderColor: "rgb(128, 0, 128)",
+          tension: 0.1,
         },
       ],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
+    };
+    config = {
+      type: "line",
+      data: data,
+      options: {
+        scales: {
+          x: {
+            type: "linear",
+          },
+          y: {
+            type: "linear",
+          },
         },
       },
-    },
-  });
+    };
+    if (!b) {
+      myChart.destroy();
+    }
+    myChart = new Chart(document.getElementById("myChart"), config);
+  }
+  async function getBatt() {
+    let id = document.getElementById("id").innerHTML;
+    let n = document.getElementById("kek").innerHTML;
+    const response = await fetch(`/bins_history?sensor_id=${id}&n=${n}`);
+    const json = await response.json();
+    myLabels = [];
+    myData = [];
+    json.forEach((el) => {
+      myLabels.unshift(secondsToDhms(el.time_online));
+      myData.unshift(el.battery);
+    });
+    console.log(myLabels, myData);
+    data = {
+      labels: myLabels,
+      datasets: [
+        {
+          label: "Battery Level",
+          data: myData,
+          fill: false,
+          borderColor: "rgb(75, 192, 192)",
+          tension: 0.1,
+        },
+      ],
+    };
+    config = {
+      type: "line",
+      data: data,
+    };
+    myChart.destroy();
+    myChart = new Chart(document.getElementById("myChart"), config);
+  }
+  async function getTemp() {
+    let id = document.getElementById("id").innerHTML;
+    let n = document.getElementById("kek").innerHTML;
+    const response = await fetch(`/bins_history?sensor_id=${id}&n=${n}`);
+    const json = await response.json();
+    myLabels = [];
+    myData = [];
+    json.forEach((el) => {
+      myLabels.unshift(secondsToDhms(el.time_online));
+      myData.unshift(el.temperature);
+    });
+    data = {
+      labels: myLabels,
+      datasets: [
+        {
+          label: "Temperature",
+          data: myData,
+          fill: false,
+          borderColor: "rgb(75, 192, 192)",
+          tension: 0.1,
+        },
+      ],
+    };
+    config = {
+      type: "line",
+      data: data,
+    };
+
+    myChart.destroy();
+    myChart = new Chart(document.getElementById("myChart"), config);
+  }
 </script>
+
 {% endblock %}

@@ -112,7 +112,18 @@ def history(id):
     if User.query.get(current_user.id).role != 'manager':
         abort(403)
 
-    return render_template('admin/history.html')
+    if (request.args.get('n') is None):
+        result = db.session.query(Bin).filter(
+            Bin.sensor_id == id).order_by(Bin.timestamp.desc()).all()
+        n = len(result)
+    else:
+        n = request.args.get('n')
+        result = db.session.query(Bin).filter(Bin.sensor_id == id).order_by(
+            Bin.timestamp.desc()).limit(n).all()
+
+    result_num = len(result)
+
+    return render_template('admin/history.html', result=result, result_num=result_num, id=id, n=n)
 
 
 @admin_blueprint.route('/reports')

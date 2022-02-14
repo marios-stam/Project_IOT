@@ -2,13 +2,14 @@
 {% endblock %} {% block content %}
 
 <!-- Logo, name, description -->
-<div>
+<div class="mb-4">
   <img src="{{ url_for('static', filename='images/keep-clean.png') }}" />
   <h1>CleanerCity</h1>
   <span>An IoT solution for waste management.</span>
 </div>
 
 <!-- Links to login or register -->
+{% if not current_user.is_authenticated %}
 <div class="d-grid gap-2 d-md-block my-4">
   <a
     class="btn btn-secondary btn-lg col-md-4"
@@ -23,6 +24,7 @@
     >Register</a
   >
 </div>
+{% endif %}
 
 <!-- Explanatory cards -->
 <div class="row row-cols-1 row-cols-md-3 g-4 text-dark">
@@ -43,7 +45,7 @@
         </p>
       </div>
       <div class="card-footer">
-        <a href="{{ url_for('client_blueprint.citizen') }}" class="btn btn-primary">Try Out Contributing</a>
+        <a class="btn btn-primary">Try Out Contributing</a>
       </div>
     </div>
   </div>
@@ -63,7 +65,7 @@
         </p>
       </div>
       <div class="card-footer">
-        <a href="{{ url_for('client_blueprint.driver') }}" class="btn btn-primary">Start Your Shift</a>
+        <a class="btn btn-primary">Start Your Shift</a>
       </div>
     </div>
   </div>
@@ -84,7 +86,7 @@
         </p>
       </div>
       <div class="card-footer">
-        <a href="/mng" class="btn btn-primary">Go to Dashboard</a>
+        <a class="btn btn-primary">Go to Dashboard</a>
       </div>
     </div>
   </div>

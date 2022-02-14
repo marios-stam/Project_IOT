@@ -13,7 +13,7 @@ head %}
   <div class="row mb-5">
     <div class="col d-flex justify-content-center"></div>
   </div>
-  <p class="h3">Total number of bins: ({{bins_num}})</p>
+  <p class="h3">Total number of bins: {{bins_num}}</p>
   <div class="row">
     <div class="table-responsive">
       <table
@@ -31,7 +31,6 @@ head %}
             <th scope="col">Temperature</th>
             <th scope="col">Latest Info At</th>
             <th scope="col">Time Online</th>
-            <th scope="col">Orientation</th>
             <th scope="col">Action</th>
           </tr>
         </thead>
@@ -62,7 +61,6 @@ head %}
             <td>{{ "%.1f"|format(b.temperature) }} ℃</td>
             <td>{{ b.timestamp[:-4] }}</td>
             <td>{{ b.time_online|timed }}</td>
-            <td>{{ b.orientation }}</td>
             <td>
               <a
                 class="btn btn-primary btn-sm"
