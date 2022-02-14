@@ -21,7 +21,12 @@ def fleet_route_optimising(trucks, bins_to_collect):
         for wp in route["waypoints"][1:]:
             wps.append((wp["lon"], wp["lat"]))
 
+        # limit array to 25 elements(23+2)
+        wps = wps[:23]
+        print("wps length:", len(wps))
+
         route_with_wps = calculate_route_from_waypoints(start, wps)
+        print("mlkia route_with_wps:", route_with_wps)
 
         route_coords = route_with_wps["routes"][0]["geometry"]["coordinates"]
 
@@ -34,7 +39,8 @@ def fleet_route_optimising(trucks, bins_to_collect):
 
         total_result.append(dictionary)
 
-    total_result_file_name = os.path.join(os.getcwd(), "server/trucks/truck_routing/total_result.json")
+    total_result_file_name = os.path.join(
+        os.getcwd(), "server/trucks/truck_routing/total_result.json")
     with open(total_result_file_name, 'w') as outfile:
         outfile.write(json.dumps(total_result))
 
