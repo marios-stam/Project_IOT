@@ -1,3 +1,4 @@
+from unittest import result
 from flask import Blueprint, make_response
 from flask import current_app as app
 from flask.json import _dump_arg_defaults
@@ -98,11 +99,17 @@ def get_trucks_routing():
 
     # get all bins that need service from a truck
     # not sure if this is the right status
-    bins = get_bins_by_status("need_truck", False)
-    if bins == None:
+    result = get_bins_by_status("need_truck", False)
+    if result == None:
         return make_response(f"No bin needs truck service!")
 
-    bins = [(bin['long'], bin['lat']) for bin in bins]
+    # print("# of bins that need pick up", len(result))
+    # print(result)
+
+    bins = result
+    # bins = []
+    # for bin in result:
+    #     bins.append({"id": bin[0], "long": bin[1], "lat": bin[2]})
 
     # solve travellings salesman problem and get routes for each truck
     return jsonify(fleet_route_optimising(trucks, bins))

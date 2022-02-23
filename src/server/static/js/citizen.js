@@ -9,7 +9,7 @@ mapboxgl.accessToken =
 const map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/light-v10",
-  center: [21.735, 38.246],
+  center: [21.788902924716314, 38.288462135795776],
   zoom: 17,
 });
 
@@ -84,8 +84,8 @@ geolocate.on("geolocate", (data) => {
 });
 geolocate.on("error", () => {
   console.log("An error event has occurred.");
-  userLong = 21.73513802339923;
-  userLat = 38.24626659650408;
+  userLong = 21.788902924716314;
+  userLat = 38.288462135795776;
   start = [userLong, userLat];
   new mapboxgl.Marker().setLngLat([userLong, userLat]).addTo(map);
   drawBins();

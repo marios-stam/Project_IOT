@@ -6,6 +6,7 @@ import geopy.distance
 from datetime import datetime
 from ..bounty.db_interface import create_bounty
 from ..constants import consts
+from sqlalchemy import func
 
 
 def tested():
@@ -16,7 +17,8 @@ def get_bin(bin_id=None):
     print("Getting Bin")  # get bin
     # bin_id = request.args.get('id', type=str)
 
-    result = db.session.query(Bin).filter(Bin.sensor_id == bin_id).order_by(Bin.timestamp.desc()).limit(1).all()
+    result = db.session.query(Bin).filter(Bin.sensor_id == bin_id).order_by(
+        Bin.timestamp.desc()).limit(1).all()
     if(len(result) == 0):
         return make_response(f"No bin found with ID: {bin_id}")
     else:
@@ -123,7 +125,8 @@ def create_bin(data=None):
 def get_all_bins():
     print("Getting all Bins")  # get bin
 
-    cte = (db.session.query(Bin.sensor_id, db.func.max(Bin.timestamp).label('max_time')).group_by(Bin.sensor_id).cte(name='cte'))
+    cte = (db.session.query(Bin.sensor_id, db.func.max(Bin.timestamp).label(
+        'max_time')).group_by(Bin.sensor_id).cte(name='cte'))
     result = db.session.query(Bin).join(cte, db.and_(
         Bin.sensor_id == cte.c.sensor_id,
         Bin.timestamp == cte.c.max_time
@@ -149,17 +152,13 @@ def get_bins_by_status(status, get_latest_values=True):
         result = db.session.query(Bin).filter(
             Bin.status == status).order_by(Bin.timestamp.desc()).first()  # get the latest record
     else:
-        result = db.session.query(Bin).filter(Bin.status == status).all()
-
+        result = db.engine.execute(""" SELECT  long, lat,  MAX(`timestamp`)
+                                   FROM Bins
+                                   GROUP BY sensor_id""").all()
     if(len(result) == 0):
         return []
 
-    bins = []
-    for i in range(len(result)):
-        bin = result[i].__dict__
-        bin.pop('_sa_instance_state')
-
-        bins.append(bin)
+    bins = result
 
     return bins
 
